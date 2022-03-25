@@ -7,3 +7,18 @@
 export const security = {
   csrf: false,
 };
+
+/**
+ * mongodb setting.
+ */
+export const mongoose = {
+  client: {
+    uri: 'mongodb://localhost:27017/zCloak',
+    options: {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      user: '',
+      pass: ''
+    }
+  }
+}
