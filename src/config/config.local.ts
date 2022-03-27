@@ -18,7 +18,7 @@ export const mongoose = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       user: '',
-      pass: ''
-    }
-  }
-}
+      pass: '',
+    },
+  },
+};
