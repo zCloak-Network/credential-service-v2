@@ -11,4 +11,8 @@ export class AttesterService {
   async listAttester() {
     return await this.attesterModel.find().exec();
   }
+
+  async save(attester: Attester) {
+    await this.attesterModel.create(attester);
+  }
 }
