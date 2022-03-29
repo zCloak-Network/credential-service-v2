@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Provide } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
-import { ResultVO } from '../vo/result';
-import { AttesterService } from '../service/attester';
+import { ResultVO } from '../vo/ResultVO';
+import { AttesterService } from '../service/AttesterService';
 
 @Provide()
 @Controller('/attester')

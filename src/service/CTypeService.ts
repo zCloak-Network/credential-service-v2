@@ -1,8 +1,8 @@
 import { Provide } from '@midwayjs/decorator';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
-import { CType } from '../entity/cType';
-import { getOne } from '../util/array';
+import { CType } from '../entity/CType';
+import { getOne } from '../util/ArrayUtils';
 
 @Provide()
 export class CTypeService {

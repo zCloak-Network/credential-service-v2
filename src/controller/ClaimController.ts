@@ -9,9 +9,10 @@ import {
   Query,
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
-import { ClaimService } from '../service/claim';
-import { ResultVO } from '../vo/result';
-import { Claim } from '../entity/claim'
+import { ClaimService } from '../service/ClaimService';
+import { ResultVO } from '../vo/ResultVO';
+import { Claim } from '../entity/Claim'
+import { SaveClaimRequest } from '../request/SaveClaimRequest'
 
 @Provide()
 @Controller('/message')
@@ -38,7 +39,8 @@ export class MessageController {
     .respond(200, 'execute success')
     .build()
   @Post('/add')
-  async save(@Body(ALL) claim: Claim) {
+  async save(@Body(ALL) claimReq: SaveClaimRequest) {
+    const claim = claimReq as Claim;
     await this.claimService.save(claim);
     return ResultVO.success();
   }

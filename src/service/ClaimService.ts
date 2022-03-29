@@ -1,4 +1,4 @@
-import { Claim } from '../entity/claim';
+import { Claim } from '../entity/Claim';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { Provide } from '@midwayjs/decorator';

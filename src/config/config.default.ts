@@ -1,6 +1,6 @@
 import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
 import { loggers } from '@midwayjs/logger';
-import { ResultVO } from '../vo/result'
+import { ResultVO } from '../vo/ResultVO'
 
 export type DefaultConfig = PowerPartial<EggAppConfig>;
 
@@ -26,6 +26,7 @@ export default (appInfo: EggAppInfo) => {
   return config;
 };
 
+// global error handler
 export const onerror = {
   all(err, ctx) {
     // 在此处定义针对所有响应类型的错误处理方法

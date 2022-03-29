@@ -5,12 +5,14 @@ import {
   Get,
   Inject,
   Post,
-  Provide, Query,
+  Provide,
+  Query,
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
-import { ResultVO } from '../vo/result';
-import { CTypeService } from '../service/ctype';
-import { CType } from '../entity/cType';
+import { ResultVO } from '../vo/ResultVO';
+import { CTypeService } from '../service/CTypeService';
+import { SaveCTypeRequest } from '../request/SaveCTypeRequest';
+import { CType } from '../entity/CType'
 
 @Provide()
 @Controller('/ctypes')
@@ -37,7 +39,8 @@ export class CtypeController {
     .respond(200, 'execute success')
     .build()
   @Post('/add')
-  async save(@Body(ALL) cType: CType) {
+  async save(@Body(ALL) cTypeReq: SaveCTypeRequest) {
+    const cType = cTypeReq as CType;
     await this.cTypeService.save(cType);
     return ResultVO.success();
   }

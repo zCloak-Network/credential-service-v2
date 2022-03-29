@@ -1,6 +1,6 @@
 import { Provide } from '@midwayjs/decorator'
 import { ReturnModelType } from '@typegoose/typegoose'
-import { Attester } from '../entity/attester'
+import { Attester } from '../entity/Attester'
 import { InjectEntityModel } from '@midwayjs/typegoose'
 
 @Provide()

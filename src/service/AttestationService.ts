@@ -1,5 +1,5 @@
 import { Provide } from '@midwayjs/decorator';
-import { Attestation } from '../entity/attestation';
+import { Attestation } from '../entity/Attestation';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 

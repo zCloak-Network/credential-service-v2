@@ -7,9 +7,10 @@ import {
   Provide, Query,
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
-import { ResultVO } from '../vo/result';
-import { Attestation } from '../entity/attestation';
-import { AttestationService } from '../service/attestation';
+import { ResultVO } from '../vo/ResultVO';
+import { Attestation } from '../entity/Attestation';
+import { AttestationService } from '../service/AttestationService';
+import { SaveAttestationRequest } from '../request/SaveAttestationRequest'
 
 @Provide()
 @Controller('/attestation')
@@ -36,7 +37,8 @@ export class AttestationController {
     .respond(200, 'execute success')
     .build()
   @Post('/add')
-  async save(@Body(ALL) attestation: Attestation) {
+  async save(@Body(ALL) attestationReq: SaveAttestationRequest) {
+    const attestation = attestationReq as Attestation;
     await this.attestationService.save(attestation);
     return ResultVO.success();
   }
