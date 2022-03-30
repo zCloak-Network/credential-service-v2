@@ -36,3 +36,8 @@ export const onerror = {
     ctx.status = 500;
   },
 };
+
+export const cors = {
+  origin: '*',
+  allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+};
