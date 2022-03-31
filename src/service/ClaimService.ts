@@ -8,8 +8,8 @@ export class ClaimService {
   @InjectEntityModel(Claim)
   claimModel: ReturnModelType<typeof Claim>;
 
-  async getByReceiver(receiver: string) {
-    return await this.claimModel.find({ receiver }).exec();
+  async getByReceiver(receiverKeyId: string) {
+    return await this.claimModel.find({ receiverKeyId }).exec();
   }
 
   async save(claim: Claim) {

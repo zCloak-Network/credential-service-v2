@@ -22,13 +22,13 @@ export class MessageController {
 
   @CreateApiDoc()
     .summary('query claim')
-    .description('query claims by receiver')
-    .param('receiver')
+    .description('query claims by receiverKeyId')
+    .param('receiverKeyId')
     .respond(200, 'claim array')
     .build()
   @Get('/one')
-  async getByReceiver(@Query('receiver') receiver: string) {
-    const data = await this.claimService.getByReceiver(receiver);
+  async getByReceiver(@Query('receiverKeyId') receiverKeyId: string) {
+    const data = await this.claimService.getByReceiver(receiverKeyId);
     return ResultVO.success(data);
   }
 

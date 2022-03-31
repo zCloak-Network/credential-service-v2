@@ -2,16 +2,14 @@ import { Rule } from '@midwayjs/decorator';
 import { RuleType } from '@midwayjs/decorator/dist/annotation/rule';
 
 export class SaveClaimRequest {
-  @Rule(RuleType.any())
-  body: any;
   @Rule(RuleType.number())
-  createdAt: number;
+  receivedAt: number;
   @Rule(RuleType.string())
-  receiver: string;
+  ciphertext: string;
   @Rule(RuleType.string())
-  sender: string;
+  nonce: string;
   @Rule(RuleType.string())
-  messageId: string;
+  senderKeyId: string;
+  @Rule(RuleType.string())
+  receiverKeyId: string;
 }
-
-
