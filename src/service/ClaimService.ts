@@ -8,7 +8,7 @@ export class ClaimService {
   @InjectEntityModel(Claim)
   claimModel: ReturnModelType<typeof Claim>;
 
-  async getByReceiver(receiverKeyId: string) {
+  async getByReceiverKeyId(receiverKeyId: string) {
     return await this.claimModel.find({ receiverKeyId }).exec();
   }
 

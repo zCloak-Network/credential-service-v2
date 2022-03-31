@@ -28,7 +28,7 @@ export class MessageController {
     .build()
   @Get('/one')
   async getByReceiver(@Query('receiverKeyId') receiverKeyId: string) {
-    const data = await this.claimService.getByReceiver(receiverKeyId);
+    const data = await this.claimService.getByReceiverKeyId(receiverKeyId);
     return ResultVO.success(data);
   }
 

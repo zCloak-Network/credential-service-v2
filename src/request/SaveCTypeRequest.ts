@@ -26,6 +26,8 @@ export class SaveCTypeRequest {
   ctypeHash: string;
   @Rule(IMetadata)
   metadata: IMetadata;
+  @Rule(RuleType.string())
+  owner: string;
 }
 
 

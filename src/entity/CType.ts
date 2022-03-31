@@ -8,6 +8,8 @@ export class CType {
   metadata: IMetadata;
   @prop()
   ctypeHash: string;
+  @prop()
+  owner: string;
 }
 
 interface IMetadata {
