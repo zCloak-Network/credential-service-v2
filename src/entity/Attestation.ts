@@ -5,13 +5,13 @@ import { modelOptions, prop } from '@typegoose/typegoose'
 @modelOptions({ schemaOptions: { collection: 'attestations' } })
 export class Attestation {
   @prop()
-  body: any;
+  receivedAt: number;
   @prop()
-  createdAt: number;
+  ciphertext: string;
   @prop()
-  receiver: string;
+  nonce: string;
   @prop()
-  sender: string;
+  senderKeyId: string;
   @prop()
-  messageId: string;
+  receiverKeyId: string;
 }

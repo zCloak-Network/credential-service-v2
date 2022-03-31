@@ -25,8 +25,8 @@ export class AttestationController {
     .respond(200, 'attestation array')
     .build()
   @Get('/one')
-  async getByReceiver(@Query('receiver') receiver: string) {
-    const data = await this.attestationService.getByReceiver(receiver);
+  async getByReceiver(@Query('receiverKeyId') receiverKeyId: string) {
+    const data = await this.attestationService.getByReceiverKeyId(receiverKeyId);
     return ResultVO.success(data);
   }
 

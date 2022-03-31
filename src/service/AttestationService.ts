@@ -12,7 +12,7 @@ export class AttestationService {
     await this.attestationModel.create(attestation);
   }
 
-  async getByReceiver(receiver: string) {
+  async getByReceiverKeyId(receiver: string) {
     return await this.attestationModel.find({ receiver }).exec();
   }
 }
