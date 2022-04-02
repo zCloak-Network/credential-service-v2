@@ -52,8 +52,8 @@ export class CtypeController {
     .respond(200, 'ctype array')
     .build()
   @Get('/all')
-  async listCType() {
-    const data = await this.cTypeService.listCType();
+  async listCType(@Query() owner: string) {
+    const data = await this.cTypeService.listCType(owner);
     return ResultVO.success(data);
   }
 }

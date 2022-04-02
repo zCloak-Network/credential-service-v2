@@ -3,6 +3,7 @@ import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { CType } from '../entity/CType';
 import { getOne } from '../util/ArrayUtils';
+import { isEmpty } from '../util/StrUtils'
 
 @Provide()
 export class CTypeService {
@@ -18,7 +19,10 @@ export class CTypeService {
     await this.cTypeModel.create(cType);
   }
 
-  async listCType() {
-    return await this.cTypeModel.find().exec();
+  async listCType(owner: string) {
+    if (isEmpty(owner)) {
+      return await this.cTypeModel.find().exec();
+    }
+    return await this.cTypeModel.find({ owner }).exec();
   }
 }
