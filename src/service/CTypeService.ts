@@ -2,8 +2,7 @@ import { Provide } from '@midwayjs/decorator';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { CType } from '../entity/CType';
-import { getOne } from '../util/ArrayUtils';
-import { isEmpty } from '../util/StrUtils'
+import { isEmpty } from '../util/StrUtils';
 
 @Provide()
 export class CTypeService {
@@ -11,8 +10,7 @@ export class CTypeService {
   cTypeModel: ReturnModelType<typeof CType>;
 
   async getByCTypeHash(cTypeHash: string) {
-    const cTypes = await this.cTypeModel.find({ ctypeHash: cTypeHash }).exec();
-    return getOne(cTypes);
+    return await this.cTypeModel.findOne({ ctypeHash: cTypeHash }).exec();
   }
 
   async save(cType: CType) {
