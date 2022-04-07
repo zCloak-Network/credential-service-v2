@@ -2,9 +2,9 @@
  * result vo.
  */
 export class ResultVO {
-  private static CODE_SUCCESS = 200
+  private static CODE_SUCCESS = 200;
 
-  private static CODE_ERROR = 500
+  private static CODE_ERROR = 500;
 
   code: number;
 

@@ -1,32 +1,36 @@
 import {
   ALL,
   Body,
-  Controller, Get,
+  Controller,
+  Get,
   Inject,
   Post,
-  Provide, Query,
+  Provide,
+  Query,
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
 import { ResultVO } from '../vo/ResultVO';
 import { Attestation } from '../entity/Attestation';
 import { AttestationService } from '../service/AttestationService';
-import { SaveAttestationRequest } from '../request/SaveAttestationRequest'
+import { SaveAttestationRequest } from '../request/SaveAttestationRequest';
 
 @Provide()
-@Controller('/attestation')
+@Controller('/attestation', { tagName: 'attestation接口', description: 'v1' })
 export class AttestationController {
   @Inject()
   attestationService: AttestationService;
 
   @CreateApiDoc()
-    .summary('query attestation')
+    .summary('根据id查询attestation')
     .description('query attestations by receiver')
     .param('receiver')
     .respond(200, 'attestation array')
     .build()
   @Get('/one')
   async getByReceiver(@Query('receiverKeyId') receiverKeyId: string) {
-    const data = await this.attestationService.getByReceiverKeyId(receiverKeyId);
+    const data = await this.attestationService.getByReceiverKeyId(
+      receiverKeyId
+    );
     return ResultVO.success(data);
   }
 

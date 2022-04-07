@@ -12,7 +12,7 @@ import { CreateApiDoc } from '@midwayjs/swagger';
 import { ResultVO } from '../vo/ResultVO';
 import { CTypeService } from '../service/CTypeService';
 import { SaveCTypeRequest } from '../request/SaveCTypeRequest';
-import { CType } from '../entity/CType'
+import { CType } from '../entity/CType';
 
 @Provide()
 @Controller('/ctypes')
@@ -49,7 +49,26 @@ export class CtypeController {
     .summary('query ctypes')
     .description('query all ctype')
     .param('')
-    .respond(200, 'ctype array')
+    .respond(200, '成功', 'json', {
+      example: {
+        code: 200,
+        data: [
+          {
+            _id: '6245e47b9fa07a5d33617440',
+            metadata: {
+              $schema: 'http://kilt-protocol.org/draft-01/ctype#',
+              title: 'ctype_1',
+              properties: { Name: { type: 'string' } },
+              type: 'object',
+              $id: 'kilt:ctype:0xad2bfd093f603ed88315bfd208a168792689e63618ac19392473bb857e4aec95',
+            },
+            ctypeHash:
+              '0xad2bfd093f603ed88315bfd208a168792689e63618ac19392473bb857e4aec95',
+            __v: 0,
+          },
+        ],
+      },
+    })
     .build()
   @Get('/all')
   async listCType(@Query() owner: string) {

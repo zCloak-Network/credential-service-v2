@@ -11,8 +11,8 @@ import {
 import { CreateApiDoc } from '@midwayjs/swagger';
 import { ClaimService } from '../service/ClaimService';
 import { ResultVO } from '../vo/ResultVO';
-import { Claim } from '../entity/Claim'
-import { SaveClaimRequest } from '../request/SaveClaimRequest'
+import { Claim } from '../entity/Claim';
+import { SaveClaimRequest } from '../request/SaveClaimRequest';
 
 @Provide()
 @Controller('/message')
