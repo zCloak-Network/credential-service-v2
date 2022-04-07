@@ -14,7 +14,7 @@ import { Attester } from '../entity/Attester';
 import { SaveAttesterRequest } from '../request/SaveAttesterRequest';
 
 @Provide()
-@Controller('/attester')
+@Controller('/attester', { tagName: 'cType接口', description: 'v1' })
 export class AttesterController {
   @Inject()
   attesterService: AttesterService;
