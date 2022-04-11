@@ -2,7 +2,7 @@ import { Provide } from '@midwayjs/decorator';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { CType } from '../entity/CType';
-import { isEmpty } from '../util/StrUtils';
+import { isEmpty } from '../util/strUtils';
 
 @Provide()
 export class CTypeService {
