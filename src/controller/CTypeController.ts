@@ -48,7 +48,7 @@ export class CtypeController {
   @CreateApiDoc()
     .summary('query ctypes')
     .description('query all ctype')
-    .param('')
+    .param('owner', { required: true, description: 'lightDid 或者fullDid' })
     .respond(200, '成功', 'json', {
       example: {
         code: 200,
