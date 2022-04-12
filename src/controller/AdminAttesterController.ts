@@ -1,8 +1,17 @@
-import { ALL, Body, Controller, Inject, Post, Provide } from '@midwayjs/decorator';
+import {
+  ALL,
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Provide,
+  Query,
+} from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
 import { ResultVO } from '../vo/ResultVO';
 import { SubmitClaimRequest } from '../request/SubmitClaimRequest';
-import { AdminAttesterService } from '../service/AdminAttesterService'
+import { AdminAttesterService } from '../service/AdminAttesterService';
 
 @Provide()
 @Controller('/admin-attester', {
@@ -12,6 +21,28 @@ import { AdminAttesterService } from '../service/AdminAttesterService'
 export class AdminAttesterController {
   @Inject()
   adminAttesterService: AdminAttesterService;
+
+  @CreateApiDoc()
+    .summary('query claim attest status')
+    .description('query claim attest status by senderKeyId')
+    .param('senderKeyId')
+    .respond(200, 'attestation status', 'json', {
+      example: {
+        code: 200,
+        data: {
+          attestationStatus: 3
+        },
+      },
+    })
+    .build()
+  @Get('/attestation-status')
+  async getAttestationStatus(@Query('senderKeyId') senderKeyId: string) {
+    const attestationStatus =
+      await this.adminAttesterService.getAttestationStatusBySenderKeyId(
+        senderKeyId
+      );
+    return ResultVO.success({ attestationStatus });
+  }
 
   @CreateApiDoc()
     .summary('submit for get credential')
