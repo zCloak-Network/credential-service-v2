@@ -21,6 +21,6 @@ export class AttestationService {
     if (!isEmpty(senderKeyId)) {
       queryObj.senderKeyId = senderKeyId;
     }
-    return await this.attestationModel.find({ queryObj }).exec();
+    return await this.attestationModel.find({ ...queryObj }).exec();
   }
 }
