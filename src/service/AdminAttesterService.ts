@@ -105,7 +105,13 @@ export class AdminAttesterService {
           .then(message => {
             // save attestation
             this.logger.debug('save attestation');
-            this.attestationService.save(message as Attestation);
+            this.attestationService.save(message as Attestation).then(() => {
+              // submit success
+              this.claimService.updateAttestationStatusById(
+                claimId,
+                submitSuccess
+              );
+            });
           });
       }
     );
@@ -135,8 +141,6 @@ export class AdminAttesterService {
       resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
       reSign: true,
     });
-
-    await this.claimService.updateAttestationStatusById(claimId, submitSuccess);
   }
 
   private async decryptMessage(
@@ -149,6 +153,8 @@ export class AdminAttesterService {
 
   async getAttestationStatusBySenderKeyId(senderKeyId: string) {
     const claim = await this.claimService.getBySenderKeyId(senderKeyId);
-    return (claim && claim.attestationStatus) ? claim.attestationStatus : notSubmit;
+    return claim && claim.attestationStatus
+      ? claim.attestationStatus
+      : notSubmit;
   }
 }
