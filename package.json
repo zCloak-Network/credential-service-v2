@@ -38,7 +38,7 @@
     "start": "egg-scripts start --daemon --title=my-midway-project --framework=@midwayjs/web",
     "stop": "egg-scripts stop --title=my-midway-project",
     "start_build": "npm run build && cross-env NODE_ENV=development midway-bin dev",
-    "dev": "cross-env ets && cross-env NODE_ENV=local midway-bin dev --ts --port=80",
+    "dev": "cross-env ets && cross-env NODE_ENV=local midway-bin dev --ts --port=7001",
     "test": "midway-bin test --ts",
     "cov": "midway-bin cov --ts",
     "lint": "mwts check",
@@ -49,8 +49,7 @@
   },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",
-    "dist"
-  ],
+    "dist"  ],
   "midway-luckyeye": {
     "packages": [
       "midway_v2"

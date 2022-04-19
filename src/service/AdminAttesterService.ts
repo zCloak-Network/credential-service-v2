@@ -123,7 +123,7 @@ export class AdminAttesterService {
     fullDid: Kilt.Did.FullDidDetails,
     keystore: NaclBoxCapable
   ) {
-    this.logger.debug('submit attestation to chain');
+    this.logger.debug('submit attestation to chain...');
 
     const account = await generateAccount(this.mnemonic);
 
@@ -141,6 +141,8 @@ export class AdminAttesterService {
       resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
       reSign: true,
     });
+
+    this.logger.debug('submit chain successfully');
   }
 
   private async decryptMessage(
