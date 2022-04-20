@@ -53,7 +53,8 @@ export class AdminAttesterService {
 
     // step 1: save claim
     const claim = submitClaimRequest as Claim;
-    claim.attestationStatus = notSubmit;
+    // submitting...
+    claim.attestationStatus = submitting;
     const claimModel = await this.claimService.save(claim);
 
     const claimId = claimModel._id;
@@ -77,7 +78,7 @@ export class AdminAttesterService {
       this.didUri
     );
 
-    this.submitAttestationToChain(claimId, attestation, fullDid, keystore).then(
+    this.submitAttestationToChain(attestation, fullDid, keystore).then(
       () => {
         const messageBody = {
           content: {
@@ -118,7 +119,6 @@ export class AdminAttesterService {
   }
 
   private async submitAttestationToChain(
-    claimId: any,
     attestation: Kilt.Attestation,
     fullDid: Kilt.Did.FullDidDetails,
     keystore: NaclBoxCapable
@@ -133,8 +133,6 @@ export class AdminAttesterService {
       keystore,
       account.address
     );
-
-    await this.claimService.updateAttestationStatusById(claimId, submitting);
 
     // submit attestation to chain
     await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
