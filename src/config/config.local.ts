@@ -13,7 +13,7 @@ export const security = {
  */
 export const mongoose = {
   client: {
-    uri: 'mongodb://localhost:27017/zcloak_credential',
+    uri: 'mongodb://192.168.31.47:27017/zCloak',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -21,4 +21,16 @@ export const mongoose = {
       pass: '',
     },
   },
+};
+
+// attester configuration
+export const adminAttester = {
+  mnemonic: '',
+  address: '',
+  didUri: '',
+  wssAddress: '',
+};
+
+export const logger = {
+  consoleLevel: 'debug',
 };
