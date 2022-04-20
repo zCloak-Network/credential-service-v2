@@ -1,5 +1,5 @@
 {
-  "name": "my-midway-project",
+  "name": "credential-service",
   "version": "1.0.0",
   "description": "",
   "private": true,
@@ -35,8 +35,8 @@
     "node": ">=12.0.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=my-midway-project --framework=@midwayjs/web",
-    "stop": "egg-scripts stop --title=my-midway-project",
+    "start": "egg-scripts start --port=7001 --daemon --title=credential-service --framework=@midwayjs/web",
+    "stop": "egg-scripts stop --title=credential-service",
     "start_build": "npm run build && cross-env NODE_ENV=development midway-bin dev",
     "dev": "cross-env ets && cross-env NODE_ENV=local midway-bin dev --ts --port=7001",
     "test": "midway-bin test --ts",
@@ -49,7 +49,8 @@
   },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",
-    "dist"  ],
+    "dist"
+  ],
   "midway-luckyeye": {
     "packages": [
       "midway_v2"

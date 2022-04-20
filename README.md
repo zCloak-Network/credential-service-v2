@@ -17,7 +17,13 @@ $ open http://localhost:7001/
 ### Deploy
 
 ```bash
+$ npm run build
 $ npm start
+$ curl https://credential-service.zcloak.network/ctypes/all
+```
+
+```
+$ tailf ~/logs/my-midway-project/*.log
 $ npm stop
 ```
 
@@ -25,6 +31,5 @@ $ npm stop
 
 - Use `npm run lint` to check code style.
 - Use `npm test` to run unit test.
-
 
 [midway]: https://midwayjs.org
