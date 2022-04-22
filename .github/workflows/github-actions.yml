@@ -19,6 +19,7 @@ jobs:
           script: |
             cd /root/workspace/credential-service-v2/
             git pull
+            npm install
             npm run build
             npm stop
             npm start
