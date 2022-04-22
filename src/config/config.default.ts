@@ -31,7 +31,8 @@ export default (appInfo: EggAppInfo) => {
       // 在此处定义针对所有响应类型的错误处理方法
       // 注意，定义了 config.all 之后，其他错误处理方法不会再生效
       loggers.getLogger('logger').warn('url: %s, error is: %s', ctx.originalUrl, err)
-      ctx.body = JSON.stringify(ResultVO.error('The server is busy'));
+      // ctx.body = JSON.stringify();
+      ctx.body = ResultVO.error(err.message);
       ctx.status = 500;
     },
   };

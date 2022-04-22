@@ -124,6 +124,7 @@ export class AdminAttesterService {
     keystore: NaclBoxCapable
   ) {
     this.logger.debug('submit attestation to chain...');
+    const startTime = Date.now();
 
     const account = await generateAccount(this.mnemonic);
 
@@ -140,7 +141,9 @@ export class AdminAttesterService {
       reSign: true,
     });
 
-    this.logger.debug('submit chain successfully');
+    const endTime = Date.now();
+
+    this.logger.debug('submit chain successfully, cost time %d(ms)', endTime - startTime);
   }
 
   private async decryptMessage(

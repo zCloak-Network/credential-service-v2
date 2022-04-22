@@ -13,7 +13,7 @@ export const security = {
  */
 export const mongoose = {
   client: {
-    uri: 'mongodb://192.168.31.47:27017/zCloak',
+    uri: 'mongodb://localhost:27017/zCloak',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -29,6 +29,17 @@ export const adminAttester = {
   address: '',
   didUri: '',
   wssAddress: '',
+};
+
+export const zCloak = {
+  moonbase: {
+    // default token number
+    tokenNumber: '0.2',
+    gas: 21000,
+    url: 'https://rpc.api.moonbase.moonbeam.network',
+    address: '',
+    privateKey: '',
+  },
 };
 
 export const logger = {

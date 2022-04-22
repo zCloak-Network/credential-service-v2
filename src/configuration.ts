@@ -1,9 +1,10 @@
-import { App, Configuration } from '@midwayjs/decorator';
-import { ILifeCycle } from '@midwayjs/core';
+import { App, Config, Configuration } from '@midwayjs/decorator';
+import { ILifeCycle, IMidwayContainer } from '@midwayjs/core';
 import { Application } from 'egg';
 import { join } from 'path';
 import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
+import Web3 from 'web3';
 
 @Configuration({
   imports: [
@@ -17,7 +18,14 @@ export class ContainerLifeCycle implements ILifeCycle {
   @App()
   app: Application;
 
-  async onReady() {
+  @Config('zCloak.moonbase.url')
+  chainUrl: string;
+
+  async onReady(container: IMidwayContainer) {
+    // inject web3
+    const web3 = new Web3(this.chainUrl);
+    container.registerObject('web3', web3);
+
     console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
   }
 }
