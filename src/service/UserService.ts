@@ -3,9 +3,13 @@ import Web3 from 'web3';
 import { Transfer } from '../entity/Transfer';
 import { TransferService } from './TransferService';
 import { ILogger } from '@midwayjs/logger';
-import { transfering, transferSuccess } from '../constant/transferStatus';
-import { ObjUtils } from '../util/ObjUtils';
+import {
+  notTransfer,
+  transfering,
+  transferSuccess,
+} from '../constant/transferStatus';
 import { CommonUtils } from '../util/CommonUtils';
+import { ObjUtils } from '../util/ObjUtils';
 
 @Provide()
 export class UserService {
@@ -50,24 +54,51 @@ export class UserService {
 
     const startBalance = await this.getBalance(transfer.addressTo);
 
-    this.doTransferToUser(transfer).then(async () => {
-      let newBalance = startBalance;
+    this.logger.debug(`The balance of ${addressTo} is: ${startBalance} ETH`);
 
-      // polling
-      for (;;) {
-        newBalance = await this.getBalance(transfer.addressTo);
-        if (newBalance !== startBalance) {
-          break;
-        }
-        // sleep
-        await CommonUtils.sleep(2 * 1000);
+    this.doTransferToUser(transfer)
+      .then(async () => {
+        await this.pollingUserBalance(startBalance, transfer);
+
+        await this.transferService.updateTransferStatusById(
+          transferId,
+          transferSuccess
+        );
+
+        this.logger.debug(
+          `Successfully transfer money to user ${addressTo} , balance ${this.tokenNumber}`
+        );
+      })
+      .catch(async err => {
+        this.logger.debug(
+          `failed to transfer money to user ${addressTo} , now rollback transfer status to notTransfer`
+        );
+        // rollback transfer status
+        await this.transferService.updateTransferStatusById(
+          transferId,
+          notTransfer
+        );
+      });
+  }
+
+  private async pollingUserBalance(startBalance: number, transfer: Transfer) {
+    let newBalance = startBalance;
+
+    // polling
+    for (;;) {
+      newBalance = await this.getBalance(transfer.addressTo);
+      if (newBalance !== startBalance) {
+        this.logger.debug(
+          `The new balance of ${transfer.addressTo}, before is: ${startBalance} ETH, end is ${newBalance} ETH`
+        );
+        break;
       }
 
-      await this.transferService.updateTransferStatusById(
-        transferId,
-        transferSuccess
-      );
-    });
+      this.logger.debug('every 2 seconds polling user balance');
+
+      // sleep
+      await CommonUtils.sleep(2 * 1000);
+    }
   }
 
   private async doTransferToUser(transfer: Transfer) {

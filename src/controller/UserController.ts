@@ -52,7 +52,7 @@ export class UserController {
   async getFaucet(@Query('address') address: string) {
     const result = await this.userService.transferToUser(address);
     if (result === -1) {
-      return ResultVO.error('repeat faucet');
+      return ResultVO.error('repeat get token');
     }
     return ResultVO.success();
   }
