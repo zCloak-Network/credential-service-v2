@@ -79,10 +79,10 @@ export class AdminAttesterService {
     );
 
     this.submitAttestationToChain(attestation, fullDid, keystore).then(
-      () => {
+      async () => {
         const messageBody = {
           content: {
-            attestation: { ...attestation },
+            attestation: {...attestation},
             request: request,
           },
           type: Kilt.Message.BodyType.SUBMIT_ATTESTATION,
@@ -90,30 +90,28 @@ export class AdminAttesterService {
 
         const receiver = Kilt.Did.LightDidDetails.fromUri(message.sender);
 
-        const messageBack = new Kilt.Message(
+        const attestationMessage = new Kilt.Message(
           messageBody as MessageBody,
           this.didUri,
           message.sender
         );
 
-        messageBack
-          .encrypt(
-            fullDid.encryptionKey!.id,
-            fullDid,
-            keystore,
-            receiver.assembleKeyId(receiver.encryptionKey!.id)
-          )
-          .then(message => {
-            // save attestation
-            this.logger.debug('save attestation');
-            this.attestationService.save(message as Attestation).then(() => {
-              // submit success
-              this.claimService.updateAttestationStatusById(
-                claimId,
-                submitSuccess
-              );
-            });
-          });
+        const encryptMessage = await attestationMessage.encrypt(
+          fullDid.encryptionKey!.id,
+          fullDid,
+          keystore,
+          receiver.assembleKeyId(receiver.encryptionKey!.id)
+        );
+
+        // save attestation
+        this.logger.debug('save attestation');
+        await this.attestationService.save(encryptMessage as Attestation);
+
+        // submit success
+        await this.claimService.updateAttestationStatusById(
+          claimId,
+          submitSuccess
+        );
       }
     ).catch(err => {
       // error
