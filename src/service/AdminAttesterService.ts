@@ -16,7 +16,7 @@ import { Claim } from '../entity/Claim';
 import {
   notSubmit,
   submitting,
-  submitSuccess,
+  submitSuccess, submitFailure,
 } from '../constant/attestationStatus';
 
 @Provide()
@@ -115,7 +115,15 @@ export class AdminAttesterService {
             });
           });
       }
-    );
+    ).catch(err => {
+      // error
+      this.logger.warn(`submit attestation failure\n${err}`);
+
+      this.claimService.updateAttestationStatusById(
+        claimId,
+        submitFailure,
+      );
+    });
   }
 
   private async submitAttestationToChain(
