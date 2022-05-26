@@ -5,11 +5,13 @@ import { join } from 'path';
 import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
 import Web3 from 'web3';
+import * as orm from '@midwayjs/orm';
 
 @Configuration({
   imports: [
-    typegoose, // 加载 typegoose 组件
+    typegoose,
     swagger,
+    orm,
   ],
   importConfigs: [join(__dirname, './config')],
   conflictCheck: true,

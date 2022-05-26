@@ -45,3 +45,17 @@ export const zCloak = {
 export const logger = {
   consoleLevel: 'debug',
 };
+
+/**
+ * orm config
+ */
+export const orm = {
+  type: 'mysql',
+  host: '',
+  port: 3306,
+  username: 'root',
+  password: '',
+  database: '',
+  synchronize: false,
+  logging: true, // print sql
+};
