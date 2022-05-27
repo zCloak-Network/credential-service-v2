@@ -1,7 +1,8 @@
 name: GitHub Actions
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  dev-deploy:
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,13 +13,38 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
+          port: 22
+          script: |
+            cd /root/workspace/credential-service-v2/
+            git pull
+            npm install
+            npm run build
+            npm stop
+            npm start
+  prod-deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    environment: master
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE}}
           port: ${{ secrets.PORT }}
           script: |
-            cd /root/workspace/credential-service-v2/
+            source ~/.bashrc
+            source ~/.bash_aliases
+            cd /home/ubuntu/credential-service-v2
             git pull
+            npm install
             npm run build
             npm stop
             npm start
