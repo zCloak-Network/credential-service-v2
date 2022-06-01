@@ -49,11 +49,11 @@ export class AdminAttesterService {
   }
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
-    this.logger.debug('save claim to db');
+    this.logger.debug(`submit attestation > start`);
 
     // step 1: save claim
+    this.logger.debug(`submit attestation > save claim to db`);
     const claim = submitClaimRequest as Claim;
-    // submitting...
     claim.attestationStatus = submitting;
     const claimModel = await this.claimService.save(claim);
 
@@ -61,10 +61,12 @@ export class AdminAttesterService {
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
+
+    this.logger.debug(`submit attestation > get full did`);
     const fullDid = await getFullDid(this.address);
 
     // step 2: decrypt claim
-    this.logger.debug('decrypt message');
+    this.logger.debug(`submit attestation > decrypt claim message`);
     const message = await this.decryptMessage(
       submitClaimRequest,
       fullDid,
@@ -96,6 +98,7 @@ export class AdminAttesterService {
           message.sender
         );
 
+        this.logger.debug(`submit attestation > encrypt attestation message`);
         const encryptMessage = await attestationMessage.encrypt(
           fullDid.encryptionKey!.id,
           fullDid,
@@ -104,7 +107,7 @@ export class AdminAttesterService {
         );
 
         // save attestation
-        this.logger.debug('save attestation');
+        this.logger.debug('submit attestation > save attestation to db');
         await this.attestationService.save(encryptMessage as Attestation);
 
         // submit success
@@ -112,10 +115,12 @@ export class AdminAttesterService {
           claimId,
           submitSuccess
         );
+
+        this.logger.debug(`submit attestation > end`);
       }
     ).catch(err => {
       // error
-      this.logger.warn(`submit attestation failure\n${err}`);
+      this.logger.warn(`submit attestation > failure\n${JSON.stringify(err)}`);
 
       this.claimService.updateAttestationStatusById(
         claimId,
@@ -129,11 +134,11 @@ export class AdminAttesterService {
     fullDid: Kilt.Did.FullDidDetails,
     keystore: NaclBoxCapable
   ) {
-    this.logger.debug('submit attestation to chain...');
     const startTime = Date.now();
 
     const account = await generateAccount(this.mnemonic);
 
+    this.logger.debug(`submit attestation > authorize extrinsic tx`);
     const tx = await attestation.getStoreTx();
     const extrinsic = await fullDid.authorizeExtrinsic(
       tx,
@@ -142,14 +147,15 @@ export class AdminAttesterService {
     );
 
     // submit attestation to chain
-    await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+    this.logger.debug(`submit attestation > submit attestation to chain`);
+    const result = await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
       resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
       reSign: true,
     });
 
     const endTime = Date.now();
 
-    this.logger.debug('submit chain successfully, cost time %d(ms)', endTime - startTime);
+    this.logger.debug(`submit attestation > submit success, cost time ${endTime - startTime}(ms)\n${JSON.stringify(result)}`);
   }
 
   private async decryptMessage(
