@@ -3,7 +3,7 @@ import {
   Body,
   Controller,
   Get,
-  Inject,
+  Inject, Param,
   Post,
   Provide,
   Query,
@@ -41,7 +41,7 @@ export class AdminAttesterController {
       await this.adminAttesterService.getAttestationStatusBySenderKeyId(
         senderKeyId
       );
-    return ResultVO.success({ attestationStatus });
+    return ResultVO.success({attestationStatus});
   }
 
   @CreateApiDoc()
@@ -61,5 +61,40 @@ export class AdminAttesterController {
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
     await this.adminAttesterService.submitClaim(submitClaimRequest);
     return ResultVO.success();
+  }
+
+  @CreateApiDoc()
+    .summary('submit claim')
+    .param('claim entity')
+    .respond(200, 'operate success', 'json', {
+      example: {
+        code: 200,
+        data: {},
+      },
+    })
+    .build()
+  @Post('/claim')
+  async submitClaimToQueue(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    await this.adminAttesterService.submitClaimToQueue(submitClaimRequest);
+    return ResultVO.success();
+  }
+
+  @CreateApiDoc()
+    .summary('get claim status')
+    .param('claim id')
+    .respond(200, 'operate success', 'json', {
+      example: {
+        code: 200,
+        data: {
+          status: 1,
+          position: 2,
+        },
+      },
+    })
+    .build()
+  @Get('/claim/:rootHash/attested-status')
+  async getClaimAttestedStatus(@Param('rootHash') rootHash: string) {
+    const status = await this.adminAttesterService.getClaimAttestedStatus(rootHash);
+    return  ResultVO.success(status);
   }
 }
