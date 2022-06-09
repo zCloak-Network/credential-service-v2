@@ -1,8 +1,13 @@
 import { EntityModel } from '@midwayjs/typegoose';
-import { modelOptions, prop } from '@typegoose/typegoose';
+import { modelOptions, prop, Severity } from '@typegoose/typegoose';
 
 @EntityModel()
-@modelOptions({ schemaOptions: { collection: 'ctypes' } })
+@modelOptions({
+  schemaOptions: { collection: 'ctypes' },
+  options: {
+    allowMixed: Severity.ALLOW,
+  },
+})
 export class CType {
   @prop()
   metadata: IMetadata;

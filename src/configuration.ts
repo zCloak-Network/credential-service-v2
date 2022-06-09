@@ -1,15 +1,19 @@
-import { App, Config, Configuration } from '@midwayjs/decorator';
+import { App, Config, Configuration, Inject } from '@midwayjs/decorator';
 import { ILifeCycle, IMidwayContainer } from '@midwayjs/core';
 import { Application } from 'egg';
 import { join } from 'path';
 import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
 import Web3 from 'web3';
+import * as orm from '@midwayjs/orm';
+import { AppInitializerHelper } from './framework/AppInitializerHelper';
+import { AdminAttesterService } from './service/AdminAttesterService';
 
 @Configuration({
   imports: [
-    typegoose, // 加载 typegoose 组件
+    typegoose,
     swagger,
+    orm,
   ],
   importConfigs: [join(__dirname, './config')],
   conflictCheck: true,
@@ -21,10 +25,15 @@ export class ContainerLifeCycle implements ILifeCycle {
   @Config('zCloak.moonbase.url')
   chainUrl: string;
 
+  @Inject()
+  adminAttesterService: AdminAttesterService;
+
   async onReady(container: IMidwayContainer) {
     // inject web3
     const web3 = new Web3(this.chainUrl);
     container.registerObject('web3', web3);
+
+    await AppInitializerHelper.init(this.app);
 
     console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
   }
