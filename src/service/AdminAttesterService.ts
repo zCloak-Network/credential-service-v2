@@ -254,6 +254,11 @@ export class AdminAttesterService {
       keystore
     );
 
+    const userDid = Kilt.Did.LightDidDetails.fromUri(message.sender);
+    const userAddress = userDid.identifier;
+
+    const logPrefix = `submit attestation [user address: ${userAddress}] >`;
+
     const request = (message.body.content as any).requestForAttestation;
     const attestation = Kilt.Attestation.fromRequestAndDid(
       request,
@@ -268,7 +273,7 @@ export class AdminAttesterService {
 
     try {
       const startTime = Date.now();
-      this.logger.debug(`submit attestation > authorize extrinsic tx`);
+      this.logger.debug(`${logPrefix} authorize extrinsic tx`);
       const tx = await attestation.getStoreTx();
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
@@ -277,7 +282,7 @@ export class AdminAttesterService {
       );
 
       // submit attestation to chain
-      this.logger.debug(`submit attestation > start submit attestation to chain`);
+      this.logger.debug(`${logPrefix} start submit attestation to chain`);
       const result = await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
         resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
         reSign: true,
@@ -285,14 +290,14 @@ export class AdminAttesterService {
 
       const endTime = Date.now();
 
-      this.logger.debug(`submit attestation > submit success, cost time ${endTime - startTime}(ms)\n${JSON.stringify(result)}`);
+      this.logger.debug(`${logPrefix} submit success, cost time ${endTime - startTime}(ms)\n${JSON.stringify(result)}`);
     } catch (err) {
       // error
-      this.logger.warn(`submit attestation > failure\n${JSON.stringify(err)}`);
+      this.logger.warn(`${logPrefix} failure\n${JSON.stringify(err)}`);
 
       const attestation = await Kilt.Attestation.query(claimHash);
       if (ObjUtils.isNotNull(attestation)) {
-        this.logger.debug(`submit attestation > retry query attestation success, submit success`);
+        this.logger.debug(`${logPrefix} retry query in kilt chain then find the attestation is existed`);
       } else {
         successFlag = false;
         // TODO: update attested status
@@ -313,31 +318,29 @@ export class AdminAttesterService {
       type: Kilt.Message.BodyType.SUBMIT_ATTESTATION,
     };
 
-    const receiver = Kilt.Did.LightDidDetails.fromUri(message.sender);
-
     const attestationMessage = new Kilt.Message(
       messageBody as MessageBody,
       this.didUri,
       message.sender
     );
 
-    this.logger.debug(`submit attestation > encrypt attestation message`);
+    this.logger.debug(`${logPrefix} encrypt attestation message`);
     const encryptMessage = await attestationMessage.encrypt(
       fullDid.encryptionKey!.id,
       fullDid,
       keystore,
-      receiver.assembleKeyId(receiver.encryptionKey!.id)
+      userDid.assembleKeyId(userDid.encryptionKey!.id)
     );
 
     // save attestation
-    this.logger.debug('submit attestation > save attestation to db');
+    this.logger.debug(`${logPrefix} save attestation to db`);
     await this.attestationService.save(encryptMessage as Attestation);
 
     // submit success
     // TODO: update attested status
     await this.updateClaimStatus(claimHash, 2);
 
-    this.logger.debug(`submit attestation > end`);
+    this.logger.debug(`${logPrefix} end`);
 
     return true;
   }
