@@ -15,7 +15,6 @@ import { ClaimQueue } from '../queue/impl/ClaimQueue';
 import { IQueueClient } from '../queue/IQueueClient';
 import { SubmitClaimRequest } from '../request/SubmitClaimRequest';
 import { generateAccount, generateFullKeypairs, getFullDid, } from '../util/accountUtils';
-import { DateUtils } from '../util/DateUtils';
 import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
@@ -82,8 +81,6 @@ export class AdminAttesterService {
     claim.ciphertext = submitClaimRequest.ciphertext;
     // TODO: update attested status
     claim.attestedStatus = 1;
-    claim.createTime = DateUtils.getUTCDate();
-    claim.updateTime = DateUtils.getUTCDate();
 
     // push to db
     await this.claimRepository.save(claim);
@@ -91,8 +88,6 @@ export class AdminAttesterService {
     const entity = new ClaimQueue();
     entity.rootHash = request.rootHash;
     entity.deleteFlag = AppConstant.IS_NOT_DELETE;
-    entity.createTime = DateUtils.getUTCDate();
-    entity.updateTime = DateUtils.getUTCDate();
 
     // push ot queue
     await this.claimQueueClient.add(entity);
