@@ -67,14 +67,14 @@ export class MessageController {
   async listMessage(
     @Query('receiverKeyId') receiverKeyId: string,
     @Query('senderKeyId') senderKeyId: string,
-    @Query('id_ge') idGe: number,
-    @Query('count') count: number
+    @Query('start_id') startId: number,
+    @Query('size') size: number
   ) {
     const data = await this.messageService.listMessage(
       receiverKeyId,
       senderKeyId,
-      idGe,
-      count
+      startId,
+      size
     );
     return ResultVO.success(data);
   }

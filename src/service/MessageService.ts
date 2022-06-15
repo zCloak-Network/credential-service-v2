@@ -1,6 +1,6 @@
 import { Provide } from '@midwayjs/decorator';
 import { InjectEntityModel } from '@midwayjs/orm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Claim } from '../entity/mysql/Claim';
 import { ArrUtils } from '../util/ArrUtils';
 
@@ -16,16 +16,16 @@ export class MessageService {
   async listMessage(
     receiverKeyId: string,
     senderKeyId: string,
-    idGe: number,
-    count: number
+    startId: number,
+    size: number
   ) {
     const messages = await this.claimRepository.find({
       where: {
         receiverKeyId: receiverKeyId || null,
         senderKeyId: senderKeyId || null,
-        id: idGe ? MoreThanOrEqual(idGe) : null,
+        id: startId ? MoreThan(startId) : null,
       },
-      take: count ?? null,
+      take: size || 10,
     });
 
     return ArrUtils.isNotEmpty(messages)
