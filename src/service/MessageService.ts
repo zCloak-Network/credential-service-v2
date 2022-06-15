@@ -30,8 +30,8 @@ export class MessageService {
 
     return ArrUtils.isNotEmpty(messages)
       ? messages.map(item => {
-          const { ciphertext, nonce, senderKeyId, receiverKeyId } = item;
-          return { ciphertext, nonce, senderKeyId, receiverKeyId };
+          const { ciphertext, nonce, senderKeyId, receiverKeyId, id } = item;
+          return { ciphertext, nonce, senderKeyId, receiverKeyId, id };
         })
       : null;
   }
