@@ -58,3 +58,7 @@ ALTER TABLE claim_queue MODIFY COLUMN create_time datetime NOT NULL DEFAULT CURR
 -- 2022-06-14 fix update_time
 ALTER TABLE claim MODIFY COLUMN update_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time'
 ALTER TABLE claim_queue MODIFY COLUMN update_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time'
+
+-- 2022-06-15 adapt message
+ALTER TABLE claim MODIFY COLUMN root_hash varchar(255) NULL COMMENT "credential's rootHash"
+ALTER TABLE claim MODIFY COLUMN attested_status tinyint unsigned NULL COMMENT "attested status"

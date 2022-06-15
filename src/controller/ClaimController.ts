@@ -10,8 +10,10 @@ import {
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
 import { ClaimService } from '../service/ClaimService';
+import { MessageService } from '../service/MessageService';
 import { ResultVO } from '../vo/ResultVO';
 import { Claim } from '../entity/Claim';
+import { Claim as ClaimEntity } from '../entity/mysql/Claim';
 import { SaveClaimRequest } from '../request/SaveClaimRequest';
 
 @Provide()
@@ -19,6 +21,9 @@ import { SaveClaimRequest } from '../request/SaveClaimRequest';
 export class MessageController {
   @Inject()
   claimService: ClaimService;
+
+  @Inject()
+  messageService: MessageService;
 
   @CreateApiDoc()
     .summary('query claim')
@@ -43,5 +48,34 @@ export class MessageController {
     const claim = claimReq as Claim;
     await this.claimService.save(claim);
     return ResultVO.success();
+  }
+
+  @Post('/')
+  async saveMessage(@Body(ALL) claimReq: SaveClaimRequest) {
+    const { ciphertext, senderKeyId, receiverKeyId, nonce } = claimReq;
+    const claim = new ClaimEntity();
+    claim.ciphertext = ciphertext;
+    claim.senderKeyId = senderKeyId;
+    claim.receiverKeyId = receiverKeyId;
+    claim.nonce = nonce;
+
+    await this.messageService.save(claim);
+    return ResultVO.success();
+  }
+
+  @Get('/')
+  async listMessage(
+    @Query('receiverKeyId') receiverKeyId: string,
+    @Query('senderKeyId') senderKeyId: string,
+    @Query('id_ge') idGe: number,
+    @Query('count') count: number
+  ) {
+    const data = await this.messageService.listMessage(
+      receiverKeyId,
+      senderKeyId,
+      idGe,
+      count
+    );
+    return ResultVO.success(data);
   }
 }
