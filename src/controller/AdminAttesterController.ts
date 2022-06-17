@@ -73,14 +73,14 @@ export class AdminAttesterController {
     .build()
   @Post('/submit-claim')
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    const ip = this.ctx.request.headers['x-real-ip'];
     if (
       !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
     ) {
-      this.logger.warn('verify failed.');
+      this.logger.warn(`verify failed, ip:${ip}`);
       return ResultVO.error('verify failed.');
     }
 
-    const ip = this.ctx.request.headers['x-real-ip'];
     this.logger.info(`SubmitClaim  x-real-ip > ${ip}`);
 
     if (ip === '47.243.120.137' || ip === '60.157.127.89') {
@@ -104,14 +104,14 @@ export class AdminAttesterController {
     .build()
   @Post('/claim')
   async submitClaimToQueue(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    const ip = this.ctx.request.headers['x-real-ip'];
     if (
       !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
     ) {
-      this.logger.warn('verify failed.');
+      this.logger.warn(`verify failed, ip:${ip}`);
       return ResultVO.error('verify failed.');
     }
 
-    const ip = this.ctx.request.headers['x-real-ip'];
     this.logger.info(`SubmitClaimToQueue  x-real-ip > ${ip}`);
 
     if (ip === '47.243.120.137' || ip === '60.157.127.89') {

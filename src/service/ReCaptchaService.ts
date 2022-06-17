@@ -14,7 +14,7 @@ export class ReCaptchaService {
   async verify(token: string) {
     try {
       if (isEmpty(token)) {
-        this.logger.info('token is empty.');
+        this.logger.info('Token is Empty.');
         return false;
       }
 
