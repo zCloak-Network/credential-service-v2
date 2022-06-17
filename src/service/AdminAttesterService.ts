@@ -3,7 +3,6 @@ import { MessageBody, NaclBoxCapable } from '@kiltprotocol/types';
 import { Config, Init, Inject, Logger, Provide } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
 import { InjectEntityModel } from '@midwayjs/orm';
-import { Context } from '@midwayjs/web';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { Repository } from 'typeorm';
 import { AppConstant } from '../constant/AppConstant';
@@ -59,9 +58,6 @@ export class AdminAttesterService {
   @Inject('claimQueueClient')
   claimQueueClient: IQueueClient<ClaimQueue>;
 
-  @Inject()
-  ctx: Context;
-
   @Init()
   async init() {
     await cryptoWaitReady();
@@ -69,14 +65,6 @@ export class AdminAttesterService {
   }
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.headers['x-real-ip'];
-    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
-      this.logger.info(`illegal  x-real-ip > ${ip}`);
-      return;
-    }
-
-    this.logger.info(`submitClaimToQueue  x-real-ip > ${ip}`);
-
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
 
@@ -114,13 +102,7 @@ export class AdminAttesterService {
   }
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.headers['x-real-ip'];
-    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
-      this.logger.info(`illegal  x-real-ip > ${ip}`);
-      return;
-    }
-
-    const logPrefix = `submit attestation x-real-ip [${ip}] >`;
+    const logPrefix = 'submit attestation >';
     this.logger.debug(`${logPrefix} start`);
 
     // step 1: save claim
