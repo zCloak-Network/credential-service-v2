@@ -108,7 +108,14 @@ export class AdminAttesterService {
     // step 1: save claim
     this.logger.debug(`${logPrefix} save claim to db`);
     // const claim = submitClaimRequest as Claim;
-    const claim = convertInstance(submitClaimRequest, Claim);
+    // const claim = convertInstance(submitClaimRequest, Claim);
+
+    const claim = new Claim();
+    claim.receivedAt = submitClaimRequest.receivedAt;
+    claim.ciphertext = submitClaimRequest.ciphertext;
+    claim.nonce = submitClaimRequest.nonce;
+    claim.senderKeyId = submitClaimRequest.senderKeyId;
+    claim.receiverKeyId = submitClaimRequest.receiverKeyId;
 
     claim.attestationStatus = submitting;
     const claimModel = await this.claimService.save(claim);
