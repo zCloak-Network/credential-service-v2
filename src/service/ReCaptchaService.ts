@@ -18,7 +18,7 @@ export class ReCaptchaService {
         return false;
       }
 
-      this.logger.info('url: ' + this.reCaptchaConfig.host);
+      // this.logger.info('url: ' + this.reCaptchaConfig.host);
       const { data } = await axios({
         url: this.reCaptchaConfig.host,
         method: 'post',
@@ -26,7 +26,7 @@ export class ReCaptchaService {
         data: `secret=${this.reCaptchaConfig.secretKey}&response=${token}`,
       });
 
-      this.logger.info(`verify result: ${JSON.stringify(data)}`);
+      this.logger.info(`reCaptcha Verify Result: ${JSON.stringify(data)}`);
 
       if (data && data.success) {
         return true;
@@ -36,6 +36,6 @@ export class ReCaptchaService {
     } catch (e) {
       this.logger.info('ReCaptchaService error:' + e);
     }
-    return true;
+    return false;
   }
 }

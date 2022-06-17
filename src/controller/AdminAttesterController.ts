@@ -73,10 +73,11 @@ export class AdminAttesterController {
     .build()
   @Post('/submit-claim')
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
-    if (!this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken)) {
-      this.logger.info(false);
-    } else {
-      this.logger.info(true);
+    if (
+      !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
+    ) {
+      this.logger.warn('verify failed.');
+      return ResultVO.error('verify failed.');
     }
 
     const ip = this.ctx.request.headers['x-real-ip'];
@@ -103,10 +104,11 @@ export class AdminAttesterController {
     .build()
   @Post('/claim')
   async submitClaimToQueue(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
-    if (!this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken)) {
-      this.logger.info(false);
-    } else {
-      this.logger.info(true);
+    if (
+      !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
+    ) {
+      this.logger.warn('verify failed.');
+      return ResultVO.error('verify failed.');
     }
 
     const ip = this.ctx.request.headers['x-real-ip'];
