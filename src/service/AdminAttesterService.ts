@@ -7,14 +7,23 @@ import { Context } from '@midwayjs/web';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { Repository } from 'typeorm';
 import { AppConstant } from '../constant/AppConstant';
-import { notSubmit, submitFailure, submitSuccess, submitting, } from '../constant/attestationStatus';
+import {
+  notSubmit,
+  submitFailure,
+  submitSuccess,
+  submitting,
+} from '../constant/attestationStatus';
 import { Attestation } from '../entity/Attestation';
 import { Claim } from '../entity/Claim';
 import { Claim as ClaimEntity } from '../entity/mysql/Claim';
 import { ClaimQueue } from '../queue/impl/ClaimQueue';
 import { IQueueClient } from '../queue/IQueueClient';
 import { SubmitClaimRequest } from '../request/SubmitClaimRequest';
-import { generateAccount, generateFullKeypairs, getFullDid, } from '../util/accountUtils';
+import {
+  generateAccount,
+  generateFullKeypairs,
+  getFullDid,
+} from '../util/accountUtils';
 import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
@@ -54,12 +63,12 @@ export class AdminAttesterService {
   @Init()
   async init() {
     await cryptoWaitReady();
-    await Kilt.init({address: this.wssAddress});
+    await Kilt.init({ address: this.wssAddress });
   }
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.ip;
-    this.logger.info(`submitClaimToQueue > ${ip}`);
+    const ip = this.ctx.request.headers;
+    this.logger.info(`submitClaimToQueue > ${JSON.stringify(ip)}`);
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
@@ -127,11 +136,11 @@ export class AdminAttesterService {
       this.didUri
     );
 
-    this.submitAttestationToChain(attestation, fullDid, keystore, logPrefix).then(
-      async () => {
+    this.submitAttestationToChain(attestation, fullDid, keystore, logPrefix)
+      .then(async () => {
         const messageBody = {
           content: {
-            attestation: {...attestation},
+            attestation: { ...attestation },
             request: request,
           },
           type: Kilt.Message.BodyType.SUBMIT_ATTESTATION,
@@ -164,23 +173,22 @@ export class AdminAttesterService {
         );
 
         this.logger.debug(`${logPrefix} save attestation to db end`);
-      }
-    ).catch(err => {
-      // error
-      this.logger.warn(`submit attestation > failure\n${JSON.stringify(err)}`);
+      })
+      .catch(err => {
+        // error
+        this.logger.warn(
+          `submit attestation > failure\n${JSON.stringify(err)}`
+        );
 
-      this.claimService.updateAttestationStatusById(
-        claimId,
-        submitFailure,
-      );
-    });
+        this.claimService.updateAttestationStatusById(claimId, submitFailure);
+      });
   }
 
   private async submitAttestationToChain(
     attestation: Kilt.Attestation,
     fullDid: Kilt.Did.FullDidDetails,
     keystore: NaclBoxCapable,
-    logPrefix: string,
+    logPrefix: string
   ) {
     const startTime = Date.now();
 
@@ -196,14 +204,22 @@ export class AdminAttesterService {
 
     // submit attestation to chain
     this.logger.debug(`${logPrefix} submit attestation to chain`);
-    const result = await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
-      resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-      reSign: true,
-    });
+    const result = await Kilt.BlockchainUtils.signAndSubmitTx(
+      extrinsic,
+      account,
+      {
+        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+        reSign: true,
+      }
+    );
 
     const endTime = Date.now();
 
-    this.logger.debug(`${logPrefix} submit success, cost time ${endTime - startTime}(ms)\n${JSON.stringify(result)}`);
+    this.logger.debug(
+      `${logPrefix} submit success, cost time ${
+        endTime - startTime
+      }(ms)\n${JSON.stringify(result)}`
+    );
   }
 
   private async decryptMessage(
@@ -222,9 +238,9 @@ export class AdminAttesterService {
   }
 
   async getClaimAttestedStatus(rootHash: string) {
-    const defaultStatus = {status: 0};
+    const defaultStatus = { status: 0 };
 
-    const claim = await this.claimRepository.findOneBy({rootHash});
+    const claim = await this.claimRepository.findOneBy({ rootHash });
 
     if (ObjUtils.isNull(claim)) {
       return defaultStatus;
@@ -240,7 +256,7 @@ export class AdminAttesterService {
       };
     }
 
-    return {status: claim.attestedStatus};
+    return { status: claim.attestedStatus };
   }
 
   async submitClaimSync(submitClaimRequest: SubmitClaimRequest) {
@@ -288,21 +304,31 @@ export class AdminAttesterService {
 
       // submit attestation to chain
       this.logger.debug(`${logPrefix} start submit attestation to chain`);
-      const result = await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
-        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-        reSign: true,
-      });
+      const result = await Kilt.BlockchainUtils.signAndSubmitTx(
+        extrinsic,
+        account,
+        {
+          resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+          reSign: true,
+        }
+      );
 
       const endTime = Date.now();
 
-      this.logger.debug(`${logPrefix} submit success, cost time ${endTime - startTime}(ms)\n${JSON.stringify(result)}`);
+      this.logger.debug(
+        `${logPrefix} submit success, cost time ${
+          endTime - startTime
+        }(ms)\n${JSON.stringify(result)}`
+      );
     } catch (err) {
       // error
       this.logger.warn(`${logPrefix} failure\n${JSON.stringify(err)}`);
 
       const attestation = await Kilt.Attestation.query(claimHash);
       if (ObjUtils.isNotNull(attestation)) {
-        this.logger.debug(`${logPrefix} retry query in kilt chain then find the attestation is existed`);
+        this.logger.debug(
+          `${logPrefix} retry query in kilt chain then find the attestation is existed`
+        );
       } else {
         successFlag = false;
         // TODO: update attested status
@@ -317,7 +343,7 @@ export class AdminAttesterService {
 
     const messageBody = {
       content: {
-        attestation: {...attestation},
+        attestation: { ...attestation },
         request: request,
       },
       type: Kilt.Message.BodyType.SUBMIT_ATTESTATION,
@@ -351,11 +377,14 @@ export class AdminAttesterService {
   }
 
   private async updateClaimStatus(claimHash: string, attestedStatus: number) {
-    await this.claimRepository.update({
-      rootHash: claimHash,
-    }, {
-      attestedStatus,
-    });
+    await this.claimRepository.update(
+      {
+        rootHash: claimHash,
+      },
+      {
+        attestedStatus,
+      }
+    );
   }
 
   async getClaimByRootHash(rootHash: string) {
