@@ -3,12 +3,12 @@ import { modelOptions, prop, Severity } from '@typegoose/typegoose';
 
 @EntityModel()
 @modelOptions({
-  schemaOptions: { collection: 'ctypes' },
+  schemaOptions: { collection: 'row_scan_ctypes' },
   options: {
     allowMixed: Severity.ALLOW,
   },
 })
-export class CType {
+export class RowScanCType {
   @prop()
   metadata: IMetadata;
   @prop()
