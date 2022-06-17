@@ -1,20 +1,24 @@
-import { Config, Provide } from '@midwayjs/decorator';
+import { Config, Logger, Provide } from '@midwayjs/decorator';
 import axios from 'axios';
 import { isEmpty } from '../util/strUtils';
+import { ILogger } from '@midwayjs/logger';
 
 @Provide()
 export class ReCaptchaService {
   @Config('recaptcha')
   reCaptchaConfig: any;
 
+  @Logger()
+  logger: ILogger;
+
   async verify(token: string) {
     try {
       if (isEmpty(token)) {
-        console.log('token is empty.');
+        this.logger.info('token is empty.');
         return false;
       }
 
-      console.log('url: ' + this.reCaptchaConfig.host);
+      this.logger.info('url: ' + this.reCaptchaConfig.host);
       const { data } = await axios({
         url: this.reCaptchaConfig.host,
         method: 'post',
@@ -22,7 +26,7 @@ export class ReCaptchaService {
         data: `secret=${this.reCaptchaConfig.secretKey}&response=${token}`,
       });
 
-      console.log(`verify result: ${JSON.stringify(data)}`);
+      this.logger.info(`verify result: ${JSON.stringify(data)}`);
 
       if (data && data.success) {
         return true;
@@ -30,7 +34,7 @@ export class ReCaptchaService {
         return false;
       }
     } catch (e) {
-      console.log('ReCaptchaService error:' + e);
+      this.logger.info('ReCaptchaService error:' + e);
     }
     return true;
   }

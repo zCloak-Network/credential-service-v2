@@ -74,7 +74,9 @@ export class AdminAttesterController {
   @Post('/submit-claim')
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
     if (!this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken)) {
-      console.log();
+      this.logger.info(false);
+    } else {
+      this.logger.info(true);
     }
 
     const ip = this.ctx.request.headers['x-real-ip'];
@@ -102,7 +104,9 @@ export class AdminAttesterController {
   @Post('/claim')
   async submitClaimToQueue(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
     if (!this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken)) {
-      console.log();
+      this.logger.info(false);
+    } else {
+      this.logger.info(true);
     }
 
     const ip = this.ctx.request.headers['x-real-ip'];
