@@ -108,8 +108,8 @@ export class AdminAttesterService {
   }
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.ip;
-    const logPrefix = `submit attestation[${ip}] >`;
+    const ip = this.ctx.request.headers['x-real-ip'];
+    const logPrefix = `submit attestation x-real-ip [${ip}] >`;
     this.logger.debug(`${logPrefix} start`);
 
     // step 1: save claim
