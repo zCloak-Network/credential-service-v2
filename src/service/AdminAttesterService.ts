@@ -67,8 +67,8 @@ export class AdminAttesterService {
   }
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.headers;
-    this.logger.info(`submitClaimToQueue > ${JSON.stringify(ip)}`);
+    const ip = this.ctx.request.headers['x-real-ip'];
+    this.logger.info(`submitClaimToQueue  x-real-ip > ${ip}`);
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
