@@ -69,6 +69,11 @@ export class AdminAttesterService {
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
     const ip = this.ctx.request.headers['x-real-ip'];
+    if (ip === '47.243.120.137') {
+      this.logger.info(`illegal  x-real-ip > ${ip}`);
+      return;
+    }
+
     this.logger.info(`submitClaimToQueue  x-real-ip > ${ip}`);
 
     const keystore = new Kilt.Did.DemoKeystore();
@@ -109,6 +114,11 @@ export class AdminAttesterService {
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
     const ip = this.ctx.request.headers['x-real-ip'];
+    if (ip === '47.243.120.137') {
+      this.logger.info(`illegal  x-real-ip > ${ip}`);
+      return;
+    }
+
     const logPrefix = `submit attestation x-real-ip [${ip}] >`;
     this.logger.debug(`${logPrefix} start`);
 
