@@ -1,6 +1,6 @@
-import { Rule } from '@midwayjs/decorator'
-import { RuleType } from '@midwayjs/decorator/dist/annotation/rule'
-import { CreateApiPropertyDoc } from '@midwayjs/swagger'
+import { Rule } from '@midwayjs/decorator';
+import { RuleType } from '@midwayjs/decorator/dist/annotation/rule';
+import { CreateApiPropertyDoc } from '@midwayjs/swagger';
 
 export class SubmitClaimRequest {
   @CreateApiPropertyDoc('received time')
@@ -22,4 +22,8 @@ export class SubmitClaimRequest {
   @CreateApiPropertyDoc('receiver key')
   @Rule(RuleType.string())
   receiverKeyId: string;
+
+  @CreateApiPropertyDoc('reCaptcha Token')
+  @Rule(RuleType.string())
+  reCaptchaToken: string;
 }

@@ -28,6 +28,7 @@ import { DateUtils } from '../util/DateUtils';
 import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
+import { convertInstance } from '../util';
 
 @Provide()
 export class AdminAttesterService {
@@ -124,7 +125,9 @@ export class AdminAttesterService {
 
     // step 1: save claim
     this.logger.debug(`${logPrefix} save claim to db`);
-    const claim = submitClaimRequest as Claim;
+    // const claim = submitClaimRequest as Claim;
+    const claim = convertInstance(submitClaimRequest, Claim);
+
     claim.attestationStatus = submitting;
     const claimModel = await this.claimService.save(claim);
 
@@ -263,7 +266,7 @@ export class AdminAttesterService {
 
     // TODO: update attested status
     // search position in queue
-    if (claim.attestedStatus == 1) {
+    if (claim.attestedStatus === 1) {
       const position = await this.claimQueueClient.getPosition(rootHash);
       return {
         status: 1,
