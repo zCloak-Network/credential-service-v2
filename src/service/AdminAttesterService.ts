@@ -69,7 +69,7 @@ export class AdminAttesterService {
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
     const ip = this.ctx.request.headers['x-real-ip'];
-    if (ip === '47.243.120.137') {
+    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
       this.logger.info(`illegal  x-real-ip > ${ip}`);
       return;
     }
@@ -114,7 +114,7 @@ export class AdminAttesterService {
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
     const ip = this.ctx.request.headers['x-real-ip'];
-    if (ip === '47.243.120.137') {
+    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
       this.logger.info(`illegal  x-real-ip > ${ip}`);
       return;
     }
