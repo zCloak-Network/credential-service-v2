@@ -17,7 +17,15 @@ export class CTypeService {
   }
 
   async save(cType: CType) {
-    await this.cTypeModel.create(cType);
+    const count = await this.cTypeModel
+      .count({
+        ctypeHash: cType.ctypeHash,
+        owner: cType.owner,
+      })
+      .exec();
+    if (count < 1) {
+      await this.cTypeModel.create(cType);
+    }
   }
 
   async listCType() {
@@ -35,6 +43,14 @@ export class CTypeService {
   }
 
   async saveOnChainCType(cType: CType) {
-    await this.rowScanCTypeModel.create(cType);
+    const count = await this.rowScanCTypeModel
+      .count({
+        ctypeHash: cType.ctypeHash,
+        owner: cType.owner,
+      })
+      .exec();
+    if (count < 1) {
+      await this.rowScanCTypeModel.create(cType);
+    }
   }
 }
