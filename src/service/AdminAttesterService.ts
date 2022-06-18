@@ -271,15 +271,15 @@ export class AdminAttesterService {
   }
 
   async submitClaimSync(submitClaimRequest: SubmitClaimRequest) {
-    this.logger.debug(`submit attestation > start`);
+    this.logger.debug(`[Queue] submit attestation > start`);
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
 
-    this.logger.debug(`submit attestation > get full did`);
+    // this.logger.debug(`[Queue] submit attestation > get full did`);
     const fullDid = await getFullDid(this.address);
 
-    this.logger.debug(`submit attestation > decrypt claim message`);
+    // this.logger.debug(`[Queue] submit attestation > decrypt claim message`);
     const message = await this.decryptMessage(
       submitClaimRequest,
       fullDid,
@@ -289,7 +289,7 @@ export class AdminAttesterService {
     const userDid = Kilt.Did.LightDidDetails.fromUri(message.sender);
     const userAddress = userDid.identifier;
 
-    const logPrefix = `submit attestation [user address: ${userAddress}] >`;
+    const logPrefix = `[Queue] submit attestation [user address: ${userAddress}] >`;
 
     const request = (message.body.content as any).requestForAttestation;
     const attestation = Kilt.Attestation.fromRequestAndDid(
