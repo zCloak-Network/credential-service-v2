@@ -201,7 +201,11 @@ export class AdminAttesterService {
 
     const account = await generateAccount(this.mnemonic);
 
-    this.logger.debug(`${logPrefix} authorize extrinsic tx`);
+    const txCounter = await fullDid.getNextNonce();
+    this.logger.debug(
+      `${logPrefix} authorizing extrinsic tx, txCounter: ${txCounter}`
+    );
+
     const tx = await attestation.getStoreTx();
     const extrinsic = await fullDid.authorizeExtrinsic(
       tx,
@@ -301,7 +305,10 @@ export class AdminAttesterService {
 
     try {
       const startTime = Date.now();
-      this.logger.debug(`${logPrefix} authorize extrinsic tx`);
+      const txCounter = await fullDid.getNextNonce();
+      this.logger.debug(
+        `${logPrefix} authorize extrinsic tx, txCounter: ${txCounter}`
+      );
       const tx = await attestation.getStoreTx();
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
