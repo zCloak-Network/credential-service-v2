@@ -73,6 +73,9 @@ export class AdminAttesterController {
     .build()
   @Post('/submit-claim')
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    // 废弃该接口
+    return ResultVO.error('verify failed.');
+
     const ip = this.ctx.request.headers['x-real-ip'];
     if (
       !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
