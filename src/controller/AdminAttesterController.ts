@@ -115,7 +115,7 @@ export class AdminAttesterController {
       return ResultVO.error('verify failed.');
     }
 
-    this.logger.info(`SubmitClaimToQueue  x-real-ip > ${ip}`);
+    this.logger.debug(`SubmitClaimToQueue  x-real-ip > ${ip}`);
 
     if (ip === '47.243.120.137' || ip === '60.157.127.89') {
       this.logger.info(`illegal  x-real-ip > ${ip}`);

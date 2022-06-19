@@ -272,6 +272,22 @@ export class AdminAttesterService {
     return { status: claim.attestedStatus };
   }
 
+  async step(txCounter, logPrefix, extrinsic, account) {
+    // submit attestation to chain
+    this.logger.debug(
+      `${logPrefix} start submit attestation to chain: ${txCounter}`
+    );
+
+    await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+      resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+      reSign: true,
+    });
+
+    this.logger.debug(
+      `${logPrefix} end submit attestation to chain: ${txCounter}`
+    );
+  }
+
   async submitClaimSync(submitClaimRequest: SubmitClaimRequest) {
     // this.logger.debug(`[Queue] submit attestation > start`);
 
@@ -323,9 +339,7 @@ export class AdminAttesterService {
       }
 
       const tx = await attestation.getStoreTx();
-      this.logger.info(
-        `[WATCH] nounce: ${this.txCounter}, tx counter ${tx.nonce}`
-      );
+
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,
@@ -333,12 +347,11 @@ export class AdminAttesterService {
         { txCounter: this.txCounter }
       );
 
-      // submit attestation to chain
-      this.logger.debug(`${logPrefix} start submit attestation to chain`);
-      await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
-        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-        reSign: true,
-      });
+      this.logger.info(
+        `[WATCH] nounce: ${extrinsic.nonce}, tx counter ${this.txCounter}`
+      );
+
+      await this.step(this.txCounter, logPrefix, extrinsic, account);
 
       // await CommonUtils.sleep(5000);
 
