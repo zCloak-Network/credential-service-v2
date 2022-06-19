@@ -26,7 +26,7 @@ export class ReCaptchaService {
         data: `secret=${this.reCaptchaConfig.secretKey}&response=${token}`,
       });
 
-      this.logger.info(`reCaptcha Verify Result: ${JSON.stringify(data)}`);
+      // this.logger.info(`reCaptcha Verify Result: ${JSON.stringify(data)}`);
 
       if (data && data.success) {
         return true;

@@ -27,7 +27,6 @@ import { DateUtils } from '../util/DateUtils';
 import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
-import { convertInstance } from '../util';
 import { BN } from '@polkadot/util';
 
 @Provide()
@@ -200,7 +199,7 @@ export class AdminAttesterService {
     keystore: NaclBoxCapable,
     logPrefix: string
   ) {
-    const startTime = Date.now();
+    // const startTime = Date.now();
 
     const account = await generateAccount(this.mnemonic);
 
@@ -223,20 +222,16 @@ export class AdminAttesterService {
 
     // submit attestation to chain
     // this.logger.debug(`${logPrefix} submit attestation to chain`);
-    const result = await Kilt.BlockchainUtils.signAndSubmitTx(
-      extrinsic,
-      account,
-      {
-        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-        reSign: true,
-      }
-    );
+    Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+      resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+      reSign: true,
+    });
 
-    const endTime = Date.now();
+    // const endTime = Date.now();
 
-    this.logger.debug(
-      `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
-    );
+    // this.logger.debug(
+    //   `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
+    // );
   }
 
   private async decryptMessage(
@@ -277,7 +272,7 @@ export class AdminAttesterService {
   }
 
   async submitClaimSync(submitClaimRequest: SubmitClaimRequest) {
-    this.logger.debug(`[Queue] submit attestation > start`);
+    // this.logger.debug(`[Queue] submit attestation > start`);
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
@@ -330,19 +325,16 @@ export class AdminAttesterService {
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,
-        account.address
+        account.address,
+        { txCounter: this.txCounter }
       );
 
       // submit attestation to chain
       this.logger.debug(`${logPrefix} start submit attestation to chain`);
-      const result = await Kilt.BlockchainUtils.signAndSubmitTx(
-        extrinsic,
-        account,
-        {
-          resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-          reSign: true,
-        }
-      );
+      await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+        reSign: true,
+      });
 
       const endTime = Date.now();
 
