@@ -12,13 +12,17 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
     const logPrefix = `SubmitAttestationTask >`;
 
     const logger = app.getLogger();
-    const claimQueueClient = await app.getApplicationContext().getAsync<IQueueClient<ClaimQueue>>('claimQueueClient');
-    const adminAttesterService = await app.getApplicationContext().getAsync<AdminAttesterService>(AdminAttesterService);
+    const claimQueueClient = await app
+      .getApplicationContext()
+      .getAsync<IQueueClient<ClaimQueue>>('claimQueueClient');
+    const adminAttesterService = await app
+      .getApplicationContext()
+      .getAsync<AdminAttesterService>(AdminAttesterService);
     // start task
-    new Promise(async (resolve) => {
+    new Promise(async resolve => {
       logger.info(`${logPrefix} start attestation queue submit task`);
 
-      for (; ;) {
+      for (;;) {
         let job = null;
 
         try {
@@ -34,7 +38,11 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
           try {
             claim = await adminAttesterService.getClaimByRootHash(rootHash);
           } catch (err) {
-            logger.warn(`${logPrefix} get claim by rootHash error ${rootHash}\n${JSON.stringify(err)}`);
+            logger.warn(
+              `${logPrefix} get claim by rootHash error ${rootHash}\n${JSON.stringify(
+                err
+              )}`
+            );
           }
 
           if (ObjUtils.isNotNull(claim)) {
@@ -54,11 +62,10 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
           }
         }
 
-        const waitTime = 1;
-        await CommonUtils.sleep(waitTime * 1000);
+        // const waitTime = 1;
+        await CommonUtils.sleep(100);
       }
     });
     return Promise.resolve(undefined);
   }
-
 }

@@ -345,6 +345,8 @@ export class AdminAttesterService {
       // error
       this.logger.warn(`${logPrefix} failure\n${JSON.stringify(err)}`);
 
+      this.txCounter = undefined;
+
       const attestation = await Kilt.Attestation.query(claimHash);
       if (ObjUtils.isNotNull(attestation)) {
         this.logger.debug(
