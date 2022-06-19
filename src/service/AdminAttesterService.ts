@@ -272,7 +272,19 @@ export class AdminAttesterService {
     return { status: claim.attestedStatus };
   }
 
-  async step(txCounter, logPrefix, extrinsic, account) {
+  async step2(
+    txCounter,
+    logPrefix,
+    extrinsic,
+    account,
+    attestation,
+    request,
+    message,
+    fullDid,
+    keystore,
+    userDid,
+    claimHash
+  ) {
     // submit attestation to chain
     const startTime = Date.now();
 
@@ -284,6 +296,16 @@ export class AdminAttesterService {
       resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
       reSign: true,
     });
+
+    await this.step3(
+      attestation,
+      request,
+      message,
+      fullDid,
+      keystore,
+      userDid,
+      claimHash
+    );
 
     this.logger.info(
       `${logPrefix} success submit attestation to chain: ${txCounter}, ${
@@ -350,11 +372,23 @@ export class AdminAttesterService {
         { txCounter: this.txCounter }
       );
 
-      this.logger.info(
-        `[WATCH] nounce: ${extrinsic.nonce}, tx counter ${this.txCounter}`
-      );
+      // this.logger.info(
+      //   `[WATCH] nounce: ${extrinsic.nonce}, tx counter ${this.txCounter}`
+      // );
 
-      this.step(this.txCounter, logPrefix, extrinsic, account);
+      this.step2(
+        this.txCounter,
+        logPrefix,
+        extrinsic,
+        account,
+        attestation,
+        request,
+        message,
+        fullDid,
+        keystore,
+        userDid,
+        claimHash
+      );
 
       await CommonUtils.sleep(3000);
     } catch (err) {
@@ -379,6 +413,18 @@ export class AdminAttesterService {
       return successFlag;
     }
 
+    return true;
+  }
+
+  async step3(
+    attestation,
+    request,
+    message,
+    fullDid,
+    keystore,
+    userDid,
+    claimHash
+  ) {
     const messageBody = {
       content: {
         attestation: { ...attestation },
@@ -393,7 +439,6 @@ export class AdminAttesterService {
       message.sender
     );
 
-    // this.logger.debug(`${logPrefix} encrypt attestation message`);
     const encryptMessage = await attestationMessage.encrypt(
       fullDid.encryptionKey!.id,
       fullDid,
@@ -401,17 +446,8 @@ export class AdminAttesterService {
       userDid.assembleKeyId(userDid.encryptionKey!.id)
     );
 
-    // save attestation
-    // this.logger.debug(`${logPrefix} save attestation to db`);
     await this.attestationService.save(encryptMessage as Attestation);
-
-    // submit success
-    // TODO: update attested status
     await this.updateClaimStatus(claimHash, 2);
-
-    // this.logger.debug(`${logPrefix} end`);
-
-    return true;
   }
 
   private async updateClaimStatus(claimHash: string, attestedStatus: number) {
