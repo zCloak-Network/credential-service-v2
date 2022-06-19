@@ -311,10 +311,21 @@ export class AdminAttesterService {
 
     try {
       const startTime = Date.now();
-      const txCounter = await fullDid.getNextNonce();
-      this.logger.debug(
-        `${logPrefix} authorize extrinsic tx, txCounter: ${txCounter}`
-      );
+      // const txCounter = await fullDid.getNextNonce();
+      // this.logger.debug(
+      //   `${logPrefix} authorize extrinsic tx, txCounter: ${txCounter}`
+      // );
+
+      this.logger.debug(`old txCounter: ${this.txCounter}`);
+      if (!this.txCounter) {
+        const txCounter = await fullDid.getNextNonce();
+        this.txCounter = txCounter;
+        this.logger.debug(`Fetch onchain next txCounter: ${this.txCounter}`);
+      } else {
+        this.txCounter = this.txCounter.addn(1);
+        this.logger.debug(`use local next txCounter: ${this.txCounter}`);
+      }
+
       const tx = await attestation.getStoreTx();
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
@@ -336,9 +347,7 @@ export class AdminAttesterService {
       const endTime = Date.now();
 
       this.logger.debug(
-        `${logPrefix} submit success, cost time ${
-          endTime - startTime
-        }(ms)\n${JSON.stringify(result)}`
+        `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
       );
     } catch (err) {
       // error
