@@ -28,6 +28,7 @@ import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
 import { convertInstance } from '../util';
+import { BN } from '@polkadot/util';
 
 @Provide()
 export class AdminAttesterService {
@@ -57,6 +58,8 @@ export class AdminAttesterService {
 
   @Inject('claimQueueClient')
   claimQueueClient: IQueueClient<ClaimQueue>;
+
+  txCounter: BN;
 
   @Init()
   async init() {
@@ -201,10 +204,15 @@ export class AdminAttesterService {
 
     const account = await generateAccount(this.mnemonic);
 
-    const txCounter = await fullDid.getNextNonce();
-    this.logger.debug(
-      `${logPrefix} authorizing extrinsic tx, txCounter: ${txCounter}`
-    );
+    this.logger.debug(`old txCounter: ${this.txCounter}`);
+    if (!this.txCounter) {
+      const txCounter = await fullDid.getNextNonce();
+      this.txCounter = txCounter;
+      this.logger.debug(`Fetch onchain next txCounter: ${txCounter}`);
+    } else {
+      this.txCounter = this.txCounter.addn(1);
+      this.logger.debug(`use local next txCounter: ${this.txCounter}`);
+    }
 
     const tx = await attestation.getStoreTx();
     const extrinsic = await fullDid.authorizeExtrinsic(
@@ -214,7 +222,7 @@ export class AdminAttesterService {
     );
 
     // submit attestation to chain
-    this.logger.debug(`${logPrefix} submit attestation to chain`);
+    // this.logger.debug(`${logPrefix} submit attestation to chain`);
     const result = await Kilt.BlockchainUtils.signAndSubmitTx(
       extrinsic,
       account,
@@ -227,9 +235,7 @@ export class AdminAttesterService {
     const endTime = Date.now();
 
     this.logger.debug(
-      `${logPrefix} submit success, cost time ${
-        endTime - startTime
-      }(ms)\n${JSON.stringify(result)}`
+      `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
     );
   }
 
