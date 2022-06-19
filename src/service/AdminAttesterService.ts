@@ -164,7 +164,7 @@ export class AdminAttesterService {
           message.sender
         );
 
-        this.logger.debug(`${logPrefix} encrypt attestation message`);
+        // this.logger.debug(`${logPrefix} encrypt attestation message`);
         const encryptMessage = await attestationMessage.encrypt(
           fullDid.encryptionKey!.id,
           fullDid,
@@ -173,7 +173,7 @@ export class AdminAttesterService {
         );
 
         // save attestation
-        this.logger.debug(`${logPrefix} save attestation to db`);
+        // this.logger.debug(`${logPrefix} save attestation to db`);
         await this.attestationService.save(encryptMessage as Attestation);
 
         // submit success
@@ -182,7 +182,7 @@ export class AdminAttesterService {
           submitSuccess
         );
 
-        this.logger.debug(`${logPrefix} save attestation to db end`);
+        // this.logger.debug(`${logPrefix} save attestation to db end`);
       })
       .catch(err => {
         // error
@@ -274,6 +274,8 @@ export class AdminAttesterService {
 
   async step(txCounter, logPrefix, extrinsic, account) {
     // submit attestation to chain
+    const startTime = Date.now();
+
     this.logger.info(
       `${logPrefix} start submit attestation to chain: ${txCounter}`
     );
@@ -284,7 +286,9 @@ export class AdminAttesterService {
     });
 
     this.logger.info(
-      `${logPrefix} end submit attestation to chain: ${txCounter}`
+      `${logPrefix} success submit attestation to chain: ${txCounter}, ${
+        Date.now() - startTime
+      }ms`
     );
   }
 
@@ -322,7 +326,6 @@ export class AdminAttesterService {
     const successFlag = true;
 
     try {
-      const startTime = Date.now();
       // const txCounter = await fullDid.getNextNonce();
       // this.logger.debug(
       //   `${logPrefix} authorize extrinsic tx, txCounter: ${txCounter}`
@@ -353,13 +356,7 @@ export class AdminAttesterService {
 
       this.step(this.txCounter, logPrefix, extrinsic, account);
 
-      await CommonUtils.sleep(5000);
-
-      const endTime = Date.now();
-
-      this.logger.info(
-        `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
-      );
+      await CommonUtils.sleep(3000);
     } catch (err) {
       // error
       this.logger.warn(`${logPrefix} failure\n${JSON.stringify(err)}`);
@@ -396,7 +393,7 @@ export class AdminAttesterService {
       message.sender
     );
 
-    this.logger.debug(`${logPrefix} encrypt attestation message`);
+    // this.logger.debug(`${logPrefix} encrypt attestation message`);
     const encryptMessage = await attestationMessage.encrypt(
       fullDid.encryptionKey!.id,
       fullDid,
@@ -405,14 +402,14 @@ export class AdminAttesterService {
     );
 
     // save attestation
-    this.logger.debug(`${logPrefix} save attestation to db`);
+    // this.logger.debug(`${logPrefix} save attestation to db`);
     await this.attestationService.save(encryptMessage as Attestation);
 
     // submit success
     // TODO: update attested status
     await this.updateClaimStatus(claimHash, 2);
 
-    this.logger.debug(`${logPrefix} end`);
+    // this.logger.debug(`${logPrefix} end`);
 
     return true;
   }
