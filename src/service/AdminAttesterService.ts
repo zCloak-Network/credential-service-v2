@@ -323,7 +323,9 @@ export class AdminAttesterService {
       }
 
       const tx = await attestation.getStoreTx();
-      console.log(`[WATCH] nounce: ${this.txCounter}, tx counter ${tx.nonce}`);
+      this.logger.info(
+        `[WATCH] nounce: ${this.txCounter}, tx counter ${tx.nonce}`
+      );
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,

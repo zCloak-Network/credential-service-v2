@@ -59,3 +59,9 @@ export const orm = {
   synchronize: false,
   logging: true, // print sql
 };
+
+export const recaptcha = {
+  host: 'https://www.google.com/recaptcha/api/siteverify',
+  siteKey: '6LdmRHogAAAAAF9YN6bMc6hNExitqRJog3-wDkH-',
+  secretKey: '6LdmRHogAAAAABc9ahXDdqpa103BjkIZ_Xheejwi',
+};
