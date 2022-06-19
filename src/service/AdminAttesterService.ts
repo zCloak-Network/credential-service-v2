@@ -28,6 +28,7 @@ import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
 import { BN } from '@polkadot/util';
+// import { CommonUtils } from '../../util/CommonUtils';
 
 @Provide()
 export class AdminAttesterService {
@@ -322,11 +323,12 @@ export class AdminAttesterService {
       }
 
       const tx = await attestation.getStoreTx();
+      console.log(`[WATCH] nounce: ${this.txCounter}, tx counter ${tx.nonce}`);
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,
-        account.address
-        // { txCounter: this.txCounter }
+        account.address,
+        { txCounter: this.txCounter }
       );
 
       // submit attestation to chain
@@ -335,6 +337,8 @@ export class AdminAttesterService {
         resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
         reSign: true,
       });
+
+      // await CommonUtils.sleep(5000);
 
       const endTime = Date.now();
 
