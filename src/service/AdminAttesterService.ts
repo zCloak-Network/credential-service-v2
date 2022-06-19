@@ -28,7 +28,7 @@ import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
 import { BN } from '@polkadot/util';
-// import { CommonUtils } from '../../util/CommonUtils';
+import { CommonUtils } from '../util/CommonUtils';
 
 @Provide()
 export class AdminAttesterService {
@@ -274,7 +274,7 @@ export class AdminAttesterService {
 
   async step(txCounter, logPrefix, extrinsic, account) {
     // submit attestation to chain
-    this.logger.debug(
+    this.logger.info(
       `${logPrefix} start submit attestation to chain: ${txCounter}`
     );
 
@@ -283,7 +283,7 @@ export class AdminAttesterService {
       reSign: true,
     });
 
-    this.logger.debug(
+    this.logger.info(
       `${logPrefix} end submit attestation to chain: ${txCounter}`
     );
   }
@@ -351,13 +351,13 @@ export class AdminAttesterService {
         `[WATCH] nounce: ${extrinsic.nonce}, tx counter ${this.txCounter}`
       );
 
-      await this.step(this.txCounter, logPrefix, extrinsic, account);
+      this.step(this.txCounter, logPrefix, extrinsic, account);
 
-      // await CommonUtils.sleep(5000);
+      await CommonUtils.sleep(5000);
 
       const endTime = Date.now();
 
-      this.logger.debug(
+      this.logger.info(
         `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
       );
     } catch (err) {
