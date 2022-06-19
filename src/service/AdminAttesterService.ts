@@ -302,7 +302,7 @@ export class AdminAttesterService {
 
     const account = await generateAccount(this.mnemonic);
 
-    let successFlag = true;
+    const successFlag = true;
 
     try {
       const startTime = Date.now();
@@ -325,8 +325,8 @@ export class AdminAttesterService {
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,
-        account.address,
-        { txCounter: this.txCounter }
+        account.address
+        // { txCounter: this.txCounter }
       );
 
       // submit attestation to chain
@@ -347,16 +347,15 @@ export class AdminAttesterService {
 
       this.txCounter = undefined;
 
-      const attestation = await Kilt.Attestation.query(claimHash);
-      if (ObjUtils.isNotNull(attestation)) {
-        this.logger.debug(
-          `${logPrefix} retry query in kilt chain then find the attestation is existed`
-        );
-      } else {
-        successFlag = false;
-        // TODO: update attested status
-        await this.updateClaimStatus(claimHash, -1);
-      }
+      // const attestation = await Kilt.Attestation.query(claimHash);
+      // if (ObjUtils.isNotNull(attestation)) {
+      //   this.logger.debug(
+      //     `${logPrefix} retry query in kilt chain then find the attestation is existed`
+      //   );
+      // } else {
+      //   successFlag = false;
+      //   await this.updateClaimStatus(claimHash, -1);
+      // }
     }
 
     // error exit
