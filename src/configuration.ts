@@ -38,7 +38,10 @@ export class ContainerLifeCycle implements ILifeCycle {
 
     // await AppInitializerHelper.init(this.app);
 
-    // 不要await
+    // kilt queue, don't await
     new SubmitAttestationTaskInitializer().doInit(this.app);
+
+    // faucet queue, don't await
+    this.userService.polling();
   }
 }
