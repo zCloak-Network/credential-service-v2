@@ -36,13 +36,14 @@ export class UserService {
     let startTime = 0;
     while (true) {
       try {
-        this.logger.debug(`FindOne from ${startTime}`);
         const recordList = await this.transferService.getByAddress2(
           2,
           startTime
         );
 
-        this.logger.debug(`FindOne from ${recordList.length}`);
+        this.logger.debug(
+          `FindOne from ${startTime}, length ${recordList.length}`
+        );
 
         if (!recordList || recordList.length <= 0) {
           await CommonUtils.sleep(1000);
@@ -50,7 +51,11 @@ export class UserService {
         }
 
         const record = recordList[0];
-
+        this.logger.debug(
+          `FindOne currentTime: ${record.timestamp}, ${new Date(
+            record.timestamp
+          )}`
+        );
         this.logger.debug(`current local NONCE ${this.nonce}`);
         if (!this.nonce) {
           this.nonce = await this.web3.eth.getTransactionCount(
