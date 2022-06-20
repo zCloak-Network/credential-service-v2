@@ -3,11 +3,7 @@ import Web3 from 'web3';
 import { Transfer } from '../entity/Transfer';
 import { TransferService } from './TransferService';
 import { ILogger } from '@midwayjs/logger';
-import {
-  notTransfer,
-  transfering,
-  transferSuccess,
-} from '../constant/transferStatus';
+import { transfering, transferSuccess } from '../constant/transferStatus';
 import { CommonUtils } from '../util/CommonUtils';
 import { ObjUtils } from '../util/ObjUtils';
 
@@ -34,7 +30,36 @@ export class UserService {
   @Inject()
   transferService: TransferService;
 
-  async transferToUser(addressTo: string) {
+  async polling() {
+    while (true) {
+      try {
+        const start = new Date().getTime();
+        const record = await this.transferService.getByAddress2(2);
+        if (!record) {
+          await CommonUtils.sleep(100);
+          continue;
+        }
+
+        await this.doTransferToUser(record.addressFrom, record.addressTo);
+        // await this.pollingUserBalance(startBalance, transfer);
+
+        await this.transferService.updateTransferStatusById(
+          record._id,
+          transferSuccess
+        );
+
+        this.logger.debug(
+          `Successfully transfer money to user ${record.addressTo} , balance ${
+            this.tokenNumber
+          }, cost ${new Date().getTime() - start}ms`
+        );
+      } catch (e) {
+        this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
+      }
+    }
+  }
+
+  async add(addressTo: string) {
     // check transfer uniqueness
     const record = await this.transferService.getByAddress(addressTo);
     if (ObjUtils.isNotNull(record)) {
@@ -48,71 +73,59 @@ export class UserService {
     transfer.addressFrom = this.addressFrom;
     transfer.addressTo = addressTo;
     transfer.value = this.tokenNumber;
-    const transferModel = await this.transferService.save(transfer);
+    await this.transferService.save(transfer);
 
-    const transferId = transferModel._id;
+    // const transferModel =
+    // const transferId = transferModel._id;
 
-    const startBalance = await this.getBalance(transfer.addressTo);
+    // const startBalance = await this.getBalance(transfer.addressTo);
 
-    this.logger.debug(`The balance of ${addressTo} is: ${startBalance} ETH`);
+    // this.logger.debug(`The balance of ${addressTo} is: ${startBalance} ETH`);
 
-    this.doTransferToUser(transfer)
-      .then(async () => {
-        await this.pollingUserBalance(startBalance, transfer);
-
-        await this.transferService.updateTransferStatusById(
-          transferId,
-          transferSuccess
-        );
-
-        this.logger.debug(
-          `Successfully transfer money to user ${addressTo} , balance ${this.tokenNumber}`
-        );
-      })
-      .catch(async err => {
-        this.logger.warn(
-          `failed to transfer money to user ${addressTo} , now rollback transfer status to notTransfer: ${JSON.stringify(
-            err
-          )}`
-        );
-        // rollback transfer status
-        await this.transferService.updateTransferStatusById(
-          transferId,
-          notTransfer
-        );
-      });
+    // .catch(async err => {
+    //   this.logger.warn(
+    //     `failed to transfer money to user ${addressTo} , now rollback transfer status to notTransfer: ${JSON.stringify(
+    //       err
+    //     )}`
+    //   );
+    //   // rollback transfer status
+    //   await this.transferService.updateTransferStatusById(
+    //     transferId,
+    //     notTransfer
+    //   );
+    // });
   }
 
-  private async pollingUserBalance(startBalance: number, transfer: Transfer) {
-    let newBalance = startBalance;
+  // private async pollingUserBalance(startBalance: number, transfer: Transfer) {
+  //   let newBalance = startBalance;
 
-    // polling
-    for (;;) {
-      newBalance = await this.getBalance(transfer.addressTo);
-      if (newBalance !== startBalance) {
-        this.logger.debug(
-          `The new balance of ${transfer.addressTo}, before is: ${startBalance} ETH, end is ${newBalance} ETH`
-        );
-        break;
-      }
+  //   // polling
+  //   for (;;) {
+  //     newBalance = await this.getBalance(transfer.addressTo);
+  //     if (newBalance !== startBalance) {
+  //       this.logger.debug(
+  //         `The new balance of ${transfer.addressTo}, before is: ${startBalance} ETH, end is ${newBalance} ETH`
+  //       );
+  //       break;
+  //     }
 
-      this.logger.debug('every 2 seconds polling user balance');
+  //     this.logger.debug('every 2 seconds polling user balance');
 
-      // sleep
-      await CommonUtils.sleep(2 * 1000);
-    }
-  }
+  //     // sleep
+  //     await CommonUtils.sleep(2 * 1000);
+  //   }
+  // }
 
-  private async doTransferToUser(transfer: Transfer) {
+  private async doTransferToUser(addressFrom, addressTo) {
     this.logger.debug(
-      `Attempting to send transaction from ${transfer.addressFrom} to ${transfer.addressTo}`
+      `Attempting to send transaction from ${addressFrom} to ${addressTo}`
     );
 
     // Sign tx with PK
     const createTransaction = await this.web3.eth.accounts.signTransaction(
       {
         gas: this.gas,
-        to: transfer.addressTo,
+        to: addressTo,
         value: this.web3.utils.toWei(this.tokenNumber, 'ether'),
       },
       this.privateKey

@@ -22,6 +22,13 @@ export class TransferService {
     return await this.transferModel.findOne({ addressTo }).exec();
   }
 
+  async getByAddress2(transferStatus: TransferStatus) {
+    // return await this.transferModel.findOne({ addressTo }).exec();
+    return await this.transferModel
+      .findOne({ transferStatus })
+      .sort({ timestamp: -1 });
+  }
+
   async save(transfer: Transfer) {
     return await this.transferModel.create(transfer);
   }

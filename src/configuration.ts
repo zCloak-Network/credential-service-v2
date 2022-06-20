@@ -9,6 +9,7 @@ import * as orm from '@midwayjs/orm';
 // import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
 import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
+import { UserService } from './service/UserService';
 
 @Configuration({
   imports: [typegoose, swagger, orm],
@@ -24,6 +25,9 @@ export class ContainerLifeCycle implements ILifeCycle {
 
   @Inject()
   adminAttesterService: AdminAttesterService;
+
+  @Inject()
+  userService: UserService;
 
   async onReady(container: IMidwayContainer) {
     console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
