@@ -42,29 +42,29 @@ export class UserService {
         );
 
         this.logger.debug(
-          `FindOne from ${startTime}, length ${recordList.length}`
+          `[FAUCET] FindOne from ${startTime}, length ${recordList.length}`
         );
 
         if (!recordList || recordList.length <= 0) {
-          await CommonUtils.sleep(1000);
+          await CommonUtils.sleep(5000);
           continue;
         }
 
         const record = recordList[0];
         this.logger.debug(
-          `FindOne currentTime: ${record.timestamp}, ${new Date(
+          `[FAUCET] FindOne currentTime: ${record.timestamp}, ${new Date(
             record.timestamp
           )}`
         );
-        this.logger.debug(`current local NONCE ${this.nonce}`);
+        this.logger.debug(`[FAUCET] current local NONCE ${this.nonce}`);
         if (!this.nonce) {
           this.nonce = await this.web3.eth.getTransactionCount(
             this.addressFrom
           );
-          this.logger.debug(`fetch onchain NONCE ${this.nonce}`);
+          this.logger.debug(`[FAUCET] fetch onchain NONCE ${this.nonce}`);
         } else {
           this.nonce = this.nonce + 1;
-          this.logger.debug(`use local NONCE ${this.nonce}`);
+          this.logger.debug(`[FAUCET] use local NONCE ${this.nonce}`);
         }
 
         startTime = record.timestamp;
@@ -72,10 +72,10 @@ export class UserService {
         // don't await
         await this.step(record);
 
-        await CommonUtils.sleep(1000);
+        await CommonUtils.sleep(5000);
       } catch (e) {
         this.nonce = undefined;
-        this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
+        this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
 
         await CommonUtils.sleep(1000);
       }
@@ -94,9 +94,9 @@ export class UserService {
     );
 
     this.logger.debug(
-      `Successfully transfer money to user ${record.addressTo} , balance ${
-        this.tokenNumber
-      }, cost ${new Date().getTime() - start}ms`
+      `[FAUCET] Successfully transfer money to user ${
+        record.addressTo
+      } , balance ${this.tokenNumber}, cost ${new Date().getTime() - start}ms`
     );
   }
 
