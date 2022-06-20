@@ -33,9 +33,12 @@ export class UserService {
   nonce: number;
 
   async polling() {
+    let startTime = 0;
     while (true) {
       try {
-        const record = await this.transferService.getByAddress2(2);
+        this.logger.debug(`FindOne from ${startTime}`);
+        const record = await this.transferService.getByAddress2(2, startTime);
+
         if (!record) {
           await CommonUtils.sleep(100);
           continue;
@@ -54,6 +57,8 @@ export class UserService {
 
         // don't await
         await this.step(record);
+        startTime = record.timestamp;
+
         await CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
