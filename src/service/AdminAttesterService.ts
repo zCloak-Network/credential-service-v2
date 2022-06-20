@@ -3,7 +3,6 @@ import { MessageBody, NaclBoxCapable } from '@kiltprotocol/types';
 import { Config, Init, Inject, Logger, Provide } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
 import { InjectEntityModel } from '@midwayjs/orm';
-import { Context } from '@midwayjs/web';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { Repository } from 'typeorm';
 import { AppConstant } from '../constant/AppConstant';
@@ -27,6 +26,8 @@ import {
 import { ObjUtils } from '../util/ObjUtils';
 import { AttestationService } from './AttestationService';
 import { ClaimService } from './ClaimService';
+import { BN } from '@polkadot/util';
+import { CommonUtils } from '../util/CommonUtils';
 
 @Provide()
 export class AdminAttesterService {
@@ -57,8 +58,7 @@ export class AdminAttesterService {
   @Inject('claimQueueClient')
   claimQueueClient: IQueueClient<ClaimQueue>;
 
-  @Inject()
-  ctx: Context;
+  txCounter: BN;
 
   @Init()
   async init() {
@@ -67,9 +67,6 @@ export class AdminAttesterService {
   }
 
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.headers['x-real-ip'];
-    this.logger.info(`submitClaimToQueue  x-real-ip > ${ip}`);
-
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
 
@@ -103,13 +100,21 @@ export class AdminAttesterService {
   }
 
   async submitClaim(submitClaimRequest: SubmitClaimRequest) {
-    const ip = this.ctx.request.ip;
-    const logPrefix = `submit attestation[${ip}] >`;
+    const logPrefix = 'submit attestation >';
     this.logger.debug(`${logPrefix} start`);
 
     // step 1: save claim
     this.logger.debug(`${logPrefix} save claim to db`);
-    const claim = submitClaimRequest as Claim;
+    // const claim = submitClaimRequest as Claim;
+    // const claim = convertInstance(submitClaimRequest, Claim);
+
+    const claim = new Claim();
+    claim.receivedAt = submitClaimRequest.receivedAt;
+    claim.ciphertext = submitClaimRequest.ciphertext;
+    claim.nonce = submitClaimRequest.nonce;
+    claim.senderKeyId = submitClaimRequest.senderKeyId;
+    claim.receiverKeyId = submitClaimRequest.receiverKeyId;
+
     claim.attestationStatus = submitting;
     const claimModel = await this.claimService.save(claim);
 
@@ -154,7 +159,7 @@ export class AdminAttesterService {
           message.sender
         );
 
-        this.logger.debug(`${logPrefix} encrypt attestation message`);
+        // this.logger.debug(`${logPrefix} encrypt attestation message`);
         const encryptMessage = await attestationMessage.encrypt(
           fullDid.encryptionKey!.id,
           fullDid,
@@ -163,7 +168,7 @@ export class AdminAttesterService {
         );
 
         // save attestation
-        this.logger.debug(`${logPrefix} save attestation to db`);
+        // this.logger.debug(`${logPrefix} save attestation to db`);
         await this.attestationService.save(encryptMessage as Attestation);
 
         // submit success
@@ -172,7 +177,7 @@ export class AdminAttesterService {
           submitSuccess
         );
 
-        this.logger.debug(`${logPrefix} save attestation to db end`);
+        // this.logger.debug(`${logPrefix} save attestation to db end`);
       })
       .catch(err => {
         // error
@@ -190,11 +195,20 @@ export class AdminAttesterService {
     keystore: NaclBoxCapable,
     logPrefix: string
   ) {
-    const startTime = Date.now();
+    // const startTime = Date.now();
 
     const account = await generateAccount(this.mnemonic);
 
-    this.logger.debug(`${logPrefix} authorize extrinsic tx`);
+    this.logger.debug(`old txCounter: ${this.txCounter}`);
+    if (!this.txCounter) {
+      const txCounter = await fullDid.getNextNonce();
+      this.txCounter = txCounter;
+      this.logger.debug(`Fetch onchain next txCounter: ${txCounter}`);
+    } else {
+      this.txCounter = this.txCounter.addn(1);
+      this.logger.debug(`use local next txCounter: ${this.txCounter}`);
+    }
+
     const tx = await attestation.getStoreTx();
     const extrinsic = await fullDid.authorizeExtrinsic(
       tx,
@@ -203,23 +217,17 @@ export class AdminAttesterService {
     );
 
     // submit attestation to chain
-    this.logger.debug(`${logPrefix} submit attestation to chain`);
-    const result = await Kilt.BlockchainUtils.signAndSubmitTx(
-      extrinsic,
-      account,
-      {
-        resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-        reSign: true,
-      }
-    );
+    // this.logger.debug(`${logPrefix} submit attestation to chain`);
+    Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+      resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+      reSign: true,
+    });
 
-    const endTime = Date.now();
+    // const endTime = Date.now();
 
-    this.logger.debug(
-      `${logPrefix} submit success, cost time ${
-        endTime - startTime
-      }(ms)\n${JSON.stringify(result)}`
-    );
+    // this.logger.debug(
+    //   `${logPrefix} submit success, cost time ${endTime - startTime}(ms)`
+    // );
   }
 
   private async decryptMessage(
@@ -248,7 +256,7 @@ export class AdminAttesterService {
 
     // TODO: update attested status
     // search position in queue
-    if (claim.attestedStatus == 1) {
+    if (claim.attestedStatus === 1) {
       const position = await this.claimQueueClient.getPosition(rootHash);
       return {
         status: 1,
@@ -259,16 +267,58 @@ export class AdminAttesterService {
     return { status: claim.attestedStatus };
   }
 
+  async step2(
+    txCounter,
+    logPrefix,
+    extrinsic,
+    account,
+    attestation,
+    request,
+    message,
+    fullDid,
+    keystore,
+    userDid,
+    claimHash
+  ) {
+    // submit attestation to chain
+    const startTime = Date.now();
+
+    this.logger.info(
+      `${logPrefix} start submit attestation to chain: ${txCounter}`
+    );
+
+    await Kilt.BlockchainUtils.signAndSubmitTx(extrinsic, account, {
+      resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
+      reSign: true,
+    });
+
+    await this.step3(
+      attestation,
+      request,
+      message,
+      fullDid,
+      keystore,
+      userDid,
+      claimHash
+    );
+
+    this.logger.info(
+      `${logPrefix} success submit attestation to chain: ${txCounter}, ${
+        Date.now() - startTime
+      }ms`
+    );
+  }
+
   async submitClaimSync(submitClaimRequest: SubmitClaimRequest) {
-    this.logger.debug(`submit attestation > start`);
+    // this.logger.debug(`[Queue] submit attestation > start`);
 
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
 
-    this.logger.debug(`submit attestation > get full did`);
+    // this.logger.debug(`[Queue] submit attestation > get full did`);
     const fullDid = await getFullDid(this.address);
 
-    this.logger.debug(`submit attestation > decrypt claim message`);
+    // this.logger.debug(`[Queue] submit attestation > decrypt claim message`);
     const message = await this.decryptMessage(
       submitClaimRequest,
       fullDid,
@@ -278,7 +328,7 @@ export class AdminAttesterService {
     const userDid = Kilt.Did.LightDidDetails.fromUri(message.sender);
     const userAddress = userDid.identifier;
 
-    const logPrefix = `submit attestation [user address: ${userAddress}] >`;
+    const logPrefix = `[Queue] submit attestation [user address: ${userAddress}] >`;
 
     const request = (message.body.content as any).requestForAttestation;
     const attestation = Kilt.Attestation.fromRequestAndDid(
@@ -290,50 +340,67 @@ export class AdminAttesterService {
 
     const account = await generateAccount(this.mnemonic);
 
-    let successFlag = true;
+    const successFlag = true;
 
     try {
-      const startTime = Date.now();
-      this.logger.debug(`${logPrefix} authorize extrinsic tx`);
+      // const txCounter = await fullDid.getNextNonce();
+      // this.logger.debug(
+      //   `${logPrefix} authorize extrinsic tx, txCounter: ${txCounter}`
+      // );
+
+      this.logger.debug(`old txCounter: ${this.txCounter}`);
+      if (!this.txCounter) {
+        const txCounter = await fullDid.getNextNonce();
+        this.txCounter = txCounter;
+        this.logger.debug(`Fetch onchain next txCounter: ${this.txCounter}`);
+      } else {
+        this.txCounter = this.txCounter.addn(1);
+        this.logger.debug(`use local next txCounter: ${this.txCounter}`);
+      }
+
       const tx = await attestation.getStoreTx();
+
       const extrinsic = await fullDid.authorizeExtrinsic(
         tx,
         keystore,
-        account.address
+        account.address,
+        { txCounter: this.txCounter }
       );
 
-      // submit attestation to chain
-      this.logger.debug(`${logPrefix} start submit attestation to chain`);
-      const result = await Kilt.BlockchainUtils.signAndSubmitTx(
+      // this.logger.info(
+      //   `[WATCH] nounce: ${extrinsic.nonce}, tx counter ${this.txCounter}`
+      // );
+
+      this.step2(
+        this.txCounter,
+        logPrefix,
         extrinsic,
         account,
-        {
-          resolveOn: Kilt.BlockchainUtils.IS_FINALIZED,
-          reSign: true,
-        }
+        attestation,
+        request,
+        message,
+        fullDid,
+        keystore,
+        userDid,
+        claimHash
       );
 
-      const endTime = Date.now();
-
-      this.logger.debug(
-        `${logPrefix} submit success, cost time ${
-          endTime - startTime
-        }(ms)\n${JSON.stringify(result)}`
-      );
+      await CommonUtils.sleep(3000);
     } catch (err) {
       // error
       this.logger.warn(`${logPrefix} failure\n${JSON.stringify(err)}`);
 
-      const attestation = await Kilt.Attestation.query(claimHash);
-      if (ObjUtils.isNotNull(attestation)) {
-        this.logger.debug(
-          `${logPrefix} retry query in kilt chain then find the attestation is existed`
-        );
-      } else {
-        successFlag = false;
-        // TODO: update attested status
-        await this.updateClaimStatus(claimHash, -1);
-      }
+      this.txCounter = undefined;
+
+      // const attestation = await Kilt.Attestation.query(claimHash);
+      // if (ObjUtils.isNotNull(attestation)) {
+      //   this.logger.debug(
+      //     `${logPrefix} retry query in kilt chain then find the attestation is existed`
+      //   );
+      // } else {
+      //   successFlag = false;
+      //   await this.updateClaimStatus(claimHash, -1);
+      // }
     }
 
     // error exit
@@ -341,6 +408,18 @@ export class AdminAttesterService {
       return successFlag;
     }
 
+    return true;
+  }
+
+  async step3(
+    attestation,
+    request,
+    message,
+    fullDid,
+    keystore,
+    userDid,
+    claimHash
+  ) {
     const messageBody = {
       content: {
         attestation: { ...attestation },
@@ -355,7 +434,6 @@ export class AdminAttesterService {
       message.sender
     );
 
-    this.logger.debug(`${logPrefix} encrypt attestation message`);
     const encryptMessage = await attestationMessage.encrypt(
       fullDid.encryptionKey!.id,
       fullDid,
@@ -363,17 +441,8 @@ export class AdminAttesterService {
       userDid.assembleKeyId(userDid.encryptionKey!.id)
     );
 
-    // save attestation
-    this.logger.debug(`${logPrefix} save attestation to db`);
     await this.attestationService.save(encryptMessage as Attestation);
-
-    // submit success
-    // TODO: update attested status
     await this.updateClaimStatus(claimHash, 2);
-
-    this.logger.debug(`${logPrefix} end`);
-
-    return true;
   }
 
   private async updateClaimStatus(claimHash: string, attestedStatus: number) {

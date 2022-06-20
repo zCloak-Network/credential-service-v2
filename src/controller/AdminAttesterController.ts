@@ -3,7 +3,9 @@ import {
   Body,
   Controller,
   Get,
-  Inject, Param,
+  Inject,
+  Logger,
+  Param,
   Post,
   Provide,
   Query,
@@ -12,6 +14,9 @@ import { CreateApiDoc } from '@midwayjs/swagger';
 import { ResultVO } from '../vo/ResultVO';
 import { SubmitClaimRequest } from '../request/SubmitClaimRequest';
 import { AdminAttesterService } from '../service/AdminAttesterService';
+import { ReCaptchaService } from '../service/ReCaptchaService';
+import { Context } from '@midwayjs/web';
+import { ILogger } from '@midwayjs/logger';
 
 @Provide()
 @Controller('/admin-attester', {
@@ -22,6 +27,15 @@ export class AdminAttesterController {
   @Inject()
   adminAttesterService: AdminAttesterService;
 
+  @Inject()
+  reCaptchaService: ReCaptchaService;
+
+  @Logger()
+  logger: ILogger;
+
+  @Inject()
+  ctx: Context;
+
   @CreateApiDoc()
     .summary('query claim attest status')
     .description('query claim attest status by senderKeyId')
@@ -30,7 +44,7 @@ export class AdminAttesterController {
       example: {
         code: 200,
         data: {
-          attestationStatus: 3
+          attestationStatus: 3,
         },
       },
     })
@@ -41,7 +55,7 @@ export class AdminAttesterController {
       await this.adminAttesterService.getAttestationStatusBySenderKeyId(
         senderKeyId
       );
-    return ResultVO.success({attestationStatus});
+    return ResultVO.success({ attestationStatus });
   }
 
   @CreateApiDoc()
@@ -59,6 +73,24 @@ export class AdminAttesterController {
     .build()
   @Post('/submit-claim')
   async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    // 废弃该接口
+    return ResultVO.error('verify failed.');
+
+    const ip = this.ctx.request.headers['x-real-ip'];
+    if (
+      !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
+    ) {
+      this.logger.warn(`verify failed, ip:${ip}`);
+      return ResultVO.error('verify failed.');
+    }
+
+    this.logger.info(`SubmitClaim  x-real-ip > ${ip}`);
+
+    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
+      this.logger.info(`illegal  x-real-ip > ${ip}`);
+      return;
+    }
+
     await this.adminAttesterService.submitClaim(submitClaimRequest);
     return ResultVO.success();
   }
@@ -75,6 +107,21 @@ export class AdminAttesterController {
     .build()
   @Post('/claim')
   async submitClaimToQueue(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+    const ip = this.ctx.request.headers['x-real-ip'];
+    if (
+      !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
+    ) {
+      this.logger.warn(`verify failed, ip:${ip}`);
+      return ResultVO.error('verify failed.');
+    }
+
+    this.logger.debug(`SubmitClaimToQueue  x-real-ip > ${ip}`);
+
+    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
+      this.logger.info(`illegal  x-real-ip > ${ip}`);
+      return;
+    }
+
     await this.adminAttesterService.submitClaimToQueue(submitClaimRequest);
     return ResultVO.success();
   }
@@ -94,7 +141,9 @@ export class AdminAttesterController {
     .build()
   @Get('/claim/:rootHash/attested-status')
   async getClaimAttestedStatus(@Param('rootHash') rootHash: string) {
-    const status = await this.adminAttesterService.getClaimAttestedStatus(rootHash);
-    return  ResultVO.success(status);
+    const status = await this.adminAttesterService.getClaimAttestedStatus(
+      rootHash
+    );
+    return ResultVO.success(status);
   }
 }

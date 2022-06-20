@@ -59,3 +59,9 @@ export const orm = {
   synchronize: false,
   logging: true, // print sql
 };
+
+export const recaptcha = {
+  host: '',
+  siteKey: '',
+  secretKey: '',
+};

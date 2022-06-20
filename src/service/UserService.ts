@@ -70,8 +70,10 @@ export class UserService {
         );
       })
       .catch(async err => {
-        this.logger.debug(
-          `failed to transfer money to user ${addressTo} , now rollback transfer status to notTransfer`
+        this.logger.warn(
+          `failed to transfer money to user ${addressTo} , now rollback transfer status to notTransfer: ${JSON.stringify(
+            err
+          )}`
         );
         // rollback transfer status
         await this.transferService.updateTransferStatusById(

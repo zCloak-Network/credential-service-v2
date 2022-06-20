@@ -2,7 +2,7 @@ name: GitHub Actions
 on: [push]
 jobs:
   dev-deploy:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/reCaptcha'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,7 +44,7 @@ jobs:
           script: |
             source ~/.bashrc
             source ~/.bash_aliases
-            cd /home/ubuntu/credential-service-v2
+            cd /mnt/credential-service-v2
             git checkout -- package.json
             git pull
             npm install
