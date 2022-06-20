@@ -67,9 +67,10 @@ export class UserService {
           this.logger.debug(`use local NONCE ${this.nonce}`);
         }
 
-        // don't await
-        await this.step(record);
         startTime = record.timestamp;
+
+        // don't await
+        this.step(record);
 
         await CommonUtils.sleep(1000);
       } catch (e) {
