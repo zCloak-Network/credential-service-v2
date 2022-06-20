@@ -26,8 +26,9 @@ export class TransferService {
     // return await this.transferModel.findOne({ addressTo }).exec();
     // use timestamp asc, so we can fetch oldest address but more than(not equal) startTime
     return await this.transferModel
-      .findOne({ transferStatus, timestamp: { $gt: startTime } })
-      .sort({ timestamp: -1 });
+      .find({ transferStatus, timestamp: { $gt: startTime } })
+      .sort({ timestamp: -1 })
+      .limit(1);
   }
 
   async save(transfer: Transfer) {

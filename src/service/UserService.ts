@@ -37,12 +37,19 @@ export class UserService {
     while (true) {
       try {
         this.logger.debug(`FindOne from ${startTime}`);
-        const record = await this.transferService.getByAddress2(2, startTime);
+        const recordList = await this.transferService.getByAddress2(
+          2,
+          startTime
+        );
 
-        if (!record) {
-          await CommonUtils.sleep(100);
+        this.logger.debug(`FindOne from ${recordList.length}`);
+
+        if (!recordList || recordList.length < 0) {
+          await CommonUtils.sleep(1000);
           continue;
         }
+
+        const record = recordList[0];
 
         this.logger.debug(`current local NONCE ${this.nonce}`);
         if (!this.nonce) {
