@@ -4,7 +4,6 @@ import { ReturnModelType } from '@typegoose/typegoose';
 import { Transfer } from '../entity/Transfer';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ObjUtils } from '../util/ObjUtils';
-import { MoreThan } from 'typeorm';
 
 @Provide()
 export class TransferService {
@@ -27,7 +26,7 @@ export class TransferService {
     // return await this.transferModel.findOne({ addressTo }).exec();
     // use timestamp asc, so we can fetch oldest address but more than(not equal) startTime
     return await this.transferModel
-      .findOne({ transferStatus, timestamp: MoreThan(startTime) })
+      .findOne({ transferStatus, timestamp: { $gt: startTime } })
       .sort({ timestamp: -1 });
   }
 

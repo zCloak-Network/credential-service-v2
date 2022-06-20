@@ -8,7 +8,7 @@ import Web3 from 'web3';
 import * as orm from '@midwayjs/orm';
 // import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
-// import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
+import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
 import { UserService } from './service/UserService';
 
 @Configuration({
@@ -36,7 +36,7 @@ export class ContainerLifeCycle implements ILifeCycle {
     // await AppInitializerHelper.init(this.app);
 
     // kilt queue, don't await
-    // new SubmitAttestationTaskInitializer().doInit(this.app);
+    new SubmitAttestationTaskInitializer().doInit(this.app);
 
     const userService = await this.app
       .getApplicationContext()
