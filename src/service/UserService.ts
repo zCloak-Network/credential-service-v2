@@ -35,35 +35,48 @@ export class UserService {
   async polling() {
     while (true) {
       try {
-        const start = new Date().getTime();
         const record = await this.transferService.getByAddress2(2);
-        this.logger.debug(`current nonce ${this.nonce}`);
-        this.logger.debug(
-          await this.web3.eth.getTransactionCount(this.addressFrom)
-        );
-
         if (!record) {
           await CommonUtils.sleep(100);
           continue;
         }
 
-        await this.doTransferToUser(record.addressFrom, record.addressTo);
-        // await this.pollingUserBalance(startBalance, transfer);
+        this.logger.debug(`current local NONCE ${this.nonce}`);
+        if (!this.nonce) {
+          this.nonce = await this.web3.eth.getTransactionCount(
+            this.addressFrom
+          );
+          this.logger.debug(`fetch onchain NONCE ${this.nonce}`);
+        } else {
+          this.nonce = this.nonce + 1;
+          this.logger.debug(`use local NONCE ${this.nonce}`);
+        }
 
-        await this.transferService.updateTransferStatusById(
-          record._id,
-          transferSuccess
-        );
-
-        this.logger.debug(
-          `Successfully transfer money to user ${record.addressTo} , balance ${
-            this.tokenNumber
-          }, cost ${new Date().getTime() - start}ms`
-        );
+        // don't await
+        this.step(record);
       } catch (e) {
+        this.nonce = undefined;
         this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
       }
     }
+  }
+
+  async step(record) {
+    const start = new Date().getTime();
+
+    await this.doTransferToUser(record.addressFrom, record.addressTo);
+    // await this.pollingUserBalance(startBalance, transfer);
+
+    await this.transferService.updateTransferStatusById(
+      record._id,
+      transferSuccess
+    );
+
+    this.logger.debug(
+      `Successfully transfer money to user ${record.addressTo} , balance ${
+        this.tokenNumber
+      }, cost ${new Date().getTime() - start}ms`
+    );
   }
 
   async add(addressTo: string) {
@@ -131,6 +144,7 @@ export class UserService {
     // Sign tx with PK
     const createTransaction = await this.web3.eth.accounts.signTransaction(
       {
+        nonce: this.nonce,
         gas: this.gas,
         to: addressTo,
         value: this.web3.utils.toWei(this.tokenNumber, 'ether'),
