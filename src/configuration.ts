@@ -36,7 +36,7 @@ export class ContainerLifeCycle implements ILifeCycle {
     // await AppInitializerHelper.init(this.app);
 
     // kilt queue, don't await
-    new SubmitAttestationTaskInitializer().doInit(this.app);
+    // new SubmitAttestationTaskInitializer().doInit(this.app);
 
     const userService = await this.app
       .getApplicationContext()
