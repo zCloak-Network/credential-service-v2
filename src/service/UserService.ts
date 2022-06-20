@@ -75,6 +75,8 @@ export class UserService {
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
+
+        await CommonUtils.sleep(1000);
       }
     }
   }
