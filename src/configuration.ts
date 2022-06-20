@@ -26,9 +26,6 @@ export class ContainerLifeCycle implements ILifeCycle {
   @Inject()
   adminAttesterService: AdminAttesterService;
 
-  @Inject()
-  userService: UserService;
-
   async onReady(container: IMidwayContainer) {
     console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
 
@@ -41,7 +38,10 @@ export class ContainerLifeCycle implements ILifeCycle {
     // kilt queue, don't await
     new SubmitAttestationTaskInitializer().doInit(this.app);
 
+    const userService = await this.app
+      .getApplicationContext()
+      .getAsync<UserService>(UserService);
     // faucet queue, don't await
-    this.userService.polling();
+    userService.polling();
   }
 }
