@@ -44,7 +44,7 @@ export class UserService {
 
         this.logger.debug(`FindOne from ${recordList.length}`);
 
-        if (!recordList || recordList.length < 0) {
+        if (!recordList || recordList.length <= 0) {
           await CommonUtils.sleep(1000);
           continue;
         }
