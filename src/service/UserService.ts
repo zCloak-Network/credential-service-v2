@@ -54,6 +54,7 @@ export class UserService {
 
         // don't await
         this.step(record);
+        await CommonUtils.sleep(100);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
