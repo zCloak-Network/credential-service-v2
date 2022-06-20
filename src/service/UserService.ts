@@ -30,11 +30,18 @@ export class UserService {
   @Inject()
   transferService: TransferService;
 
+  nonce: number;
+
   async polling() {
     while (true) {
       try {
         const start = new Date().getTime();
         const record = await this.transferService.getByAddress2(2);
+        this.logger.debug(`current nonce ${this.nonce}`);
+        this.logger.debug(
+          await this.web3.eth.getTransactionCount(this.addressFrom)
+        );
+
         if (!record) {
           await CommonUtils.sleep(100);
           continue;
