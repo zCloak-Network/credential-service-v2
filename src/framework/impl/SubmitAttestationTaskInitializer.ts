@@ -60,10 +60,9 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
             await claimQueueClient.poll();
           }
         }
+      } else {
+        await CommonUtils.sleep(2000);
       }
-
-      // const waitTime = 1;
-      await CommonUtils.sleep(100);
     }
     // });
     // return Promise.resolve(undefined);
