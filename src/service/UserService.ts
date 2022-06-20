@@ -70,7 +70,7 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        await this.step(record);
+        this.step(record);
 
         await CommonUtils.sleep(5000);
       } catch (e) {
@@ -175,7 +175,10 @@ export class UserService {
 
     // Send tx and wait for receipt
     const createReceipt = await this.web3.eth.sendSignedTransaction(
-      createTransaction.rawTransaction
+      createTransaction.rawTransaction,
+      (error, hash) => {
+        this.logger.debug(`${JSON.stringify(error)}\n ${hash}`);
+      }
     );
 
     this.logger.debug(
