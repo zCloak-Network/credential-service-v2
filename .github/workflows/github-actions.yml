@@ -44,7 +44,7 @@ jobs:
           script: |
             source ~/.bashrc
             source ~/.bash_aliases
-            cd /home/ubuntu/credential-service-v2
+            cd /mnt/credential-service-v2
             git checkout -- package.json
             git pull
             npm install

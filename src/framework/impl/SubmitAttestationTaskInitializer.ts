@@ -63,7 +63,7 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
         }
 
         // const waitTime = 1;
-        // await CommonUtils.sleep(100);
+        await CommonUtils.sleep(100);
       }
     });
     return Promise.resolve(undefined);
