@@ -8,7 +8,7 @@ import Web3 from 'web3';
 import * as orm from '@midwayjs/orm';
 // import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
-import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
+// import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
 import { UserService } from './service/UserService';
 
 @Configuration({
