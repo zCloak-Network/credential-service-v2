@@ -159,7 +159,7 @@ export class UserService {
 
   private async doTransferToUser(addressFrom, addressTo) {
     this.logger.debug(
-      `Attempting to send transaction from ${addressFrom} to ${addressTo}`
+      `[FAUCET] Attempting to send transaction from ${addressFrom} to ${addressTo}`
     );
 
     // Sign tx with PK
@@ -177,12 +177,15 @@ export class UserService {
     const createReceipt = await this.web3.eth.sendSignedTransaction(
       createTransaction.rawTransaction,
       (error, hash) => {
-        this.logger.debug(`${JSON.stringify(error)}\n ${hash}`);
+        if (error) {
+          this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
+          throw error;
+        }
       }
     );
 
     this.logger.debug(
-      `Transaction successful with hash: ${createReceipt.transactionHash}`
+      `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${this.nonce}`
     );
   }
 
