@@ -70,14 +70,14 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        await this.step(record);
+        this.step(record);
 
-        //  CommonUtils.sleep(2000);
+        CommonUtils.sleep(5000);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
 
-        await CommonUtils.sleep(1000);
+        await CommonUtils.sleep(10000);
       }
     }
   }
