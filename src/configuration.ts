@@ -27,6 +27,16 @@ export class ContainerLifeCycle implements ILifeCycle {
   adminAttesterService: AdminAttesterService;
 
   async onReady(container: IMidwayContainer) {
+    this.app.createLogger('attestation', {
+      fileLogName: 'attestation.log',
+      level: 'all',
+    });
+
+    this.app.createLogger('faucet', {
+      fileLogName: 'faucet.log',
+      level: 'all',
+    });
+
     console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
 
     // inject web3

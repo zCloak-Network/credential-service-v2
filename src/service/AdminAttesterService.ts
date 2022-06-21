@@ -50,7 +50,7 @@ export class AdminAttesterService {
   @Inject()
   attestationService: AttestationService;
 
-  @Logger()
+  @Logger('attestation')
   logger: ILogger;
 
   @InjectEntityModel(ClaimEntity)

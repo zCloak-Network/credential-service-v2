@@ -24,7 +24,7 @@ export class UserService {
   @Inject()
   web3: Web3;
 
-  @Logger()
+  @Logger('faucet')
   logger: ILogger;
 
   @Inject()
@@ -33,6 +33,7 @@ export class UserService {
   nonce: number;
 
   async polling() {
+    this.logger.debug('faucet start polling...');
     let startTime = 0;
     while (true) {
       try {
@@ -72,7 +73,7 @@ export class UserService {
         // don't await
         this.step(record);
 
-        CommonUtils.sleep(5000);
+        await CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
