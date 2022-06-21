@@ -47,7 +47,7 @@ export class UserService {
         );
 
         if (!recordList || recordList.length <= 0) {
-          await CommonUtils.sleep(3000);
+          await CommonUtils.sleep(5000);
           continue;
         }
 
@@ -97,7 +97,9 @@ export class UserService {
     this.logger.debug(
       `[FAUCET] Successfully transfer money to user ${
         record.addressTo
-      } , balance ${this.tokenNumber}, cost ${new Date().getTime() - start}ms`
+      } , balance ${this.tokenNumber}, cost ${
+        new Date().getTime() - start
+      }ms, nonce ${nonce}`
     );
   }
 
@@ -160,7 +162,7 @@ export class UserService {
 
   private async doTransferToUser(addressFrom, addressTo, nonce) {
     this.logger.debug(
-      `[FAUCET] Attempting to send transaction from ${addressFrom} to ${addressTo} nonce ${nonce}`
+      `[FAUCET] Attempting to send transaction to ${addressTo} nonce ${nonce}`
     );
 
     // Sign tx with PK
@@ -178,12 +180,14 @@ export class UserService {
     const createReceipt = await this.web3.eth.sendSignedTransaction(
       createTransaction.rawTransaction,
       (error, hash) => {
-        this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
+        this.logger.debug(
+          `[FAUCET] hash: ${hash} , error ${JSON.stringify(error)}\n`
+        );
       }
     );
 
     this.logger.debug(
-      `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${nonce}`
+      `[FAUCET] Transaction successful with hash ${createReceipt.transactionHash}, nounce ${nonce}`
     );
   }
 
