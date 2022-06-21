@@ -71,7 +71,7 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        await this.step(record);
+        await this.step(record, this.nonce);
 
         // CommonUtils.sleep(1000);
       } catch (e) {
@@ -83,10 +83,10 @@ export class UserService {
     }
   }
 
-  async step(record) {
+  async step(record, nonce) {
     const start = new Date().getTime();
 
-    await this.doTransferToUser(record.addressFrom, record.addressTo);
+    await this.doTransferToUser(record.addressFrom, record.addressTo, nonce);
     // await this.pollingUserBalance(startBalance, transfer);
 
     await this.transferService.updateTransferStatusById(
@@ -158,15 +158,15 @@ export class UserService {
   //   }
   // }
 
-  private async doTransferToUser(addressFrom, addressTo) {
+  private async doTransferToUser(addressFrom, addressTo, nonce) {
     this.logger.debug(
-      `[FAUCET] Attempting to send transaction from ${addressFrom} to ${addressTo}`
+      `[FAUCET] Attempting to send transaction from ${addressFrom} to ${addressTo} nonce ${nonce}`
     );
 
     // Sign tx with PK
     const createTransaction = await this.web3.eth.accounts.signTransaction(
       {
-        nonce: this.nonce,
+        nonce: nonce,
         gas: this.gas,
         to: addressTo,
         value: this.web3.utils.toWei(this.tokenNumber, 'ether'),
@@ -183,7 +183,7 @@ export class UserService {
     );
 
     this.logger.debug(
-      `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${this.nonce}`
+      `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${nonce}`
     );
   }
 
