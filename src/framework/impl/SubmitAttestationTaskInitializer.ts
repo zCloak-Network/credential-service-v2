@@ -61,7 +61,7 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
           }
         }
       } else {
-        await CommonUtils.sleep(2000);
+        await CommonUtils.sleep(5000);
       }
     }
     // });

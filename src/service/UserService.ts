@@ -46,7 +46,7 @@ export class UserService {
         );
 
         if (!recordList || recordList.length <= 0) {
-          await CommonUtils.sleep(5000);
+          await CommonUtils.sleep(3000);
           continue;
         }
 
@@ -70,9 +70,9 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        this.step(record);
+        await this.step(record);
 
-        await CommonUtils.sleep(5000);
+        // await CommonUtils.sleep(2000);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
