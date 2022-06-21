@@ -71,9 +71,9 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        this.step(record);
+        await this.step(record);
 
-        CommonUtils.sleep(1000);
+        // CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
@@ -178,10 +178,7 @@ export class UserService {
     const createReceipt = await this.web3.eth.sendSignedTransaction(
       createTransaction.rawTransaction,
       (error, hash) => {
-        if (error) {
-          this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
-          throw error;
-        }
+        this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
       }
     );
 
