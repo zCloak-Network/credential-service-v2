@@ -175,15 +175,24 @@ export class UserService {
     );
 
     // Send tx and wait for receipt
-    const createReceipt = await this.web3.eth.sendSignedTransaction(
-      createTransaction.rawTransaction,
-      (error, hash) => {
-        if (error) {
-          this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
-          throw error;
+    let createReceipt = null;
+    try {
+      createReceipt = await this.web3.eth.sendSignedTransaction(
+        createTransaction.rawTransaction,
+        error => {
+          if (error) {
+            this.logger.debug(
+              `[FAUCET] sendSignedTransaction error: ${JSON.stringify(error)}`
+            );
+          }
         }
-      }
-    );
+      );
+    } catch (e) {
+      this.logger.debug(
+        `[FAUCET] sendSignedTransaction 2 error: ${JSON.stringify(e)}`
+      );
+      return;
+    }
 
     this.logger.debug(
       `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${this.nonce}`
