@@ -73,7 +73,7 @@ export class UserService {
         // don't await
         this.step(record);
 
-        await CommonUtils.sleep(1000);
+        CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
         this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
@@ -175,24 +175,15 @@ export class UserService {
     );
 
     // Send tx and wait for receipt
-    let createReceipt = null;
-    try {
-      createReceipt = await this.web3.eth.sendSignedTransaction(
-        createTransaction.rawTransaction,
-        error => {
-          if (error) {
-            this.logger.debug(
-              `[FAUCET] sendSignedTransaction error: ${JSON.stringify(error)}`
-            );
-          }
+    const createReceipt = await this.web3.eth.sendSignedTransaction(
+      createTransaction.rawTransaction,
+      (error, hash) => {
+        if (error) {
+          this.logger.debug(`[FAUCET] ${JSON.stringify(error)}\n ${hash}`);
+          throw error;
         }
-      );
-    } catch (e) {
-      this.logger.debug(
-        `[FAUCET] sendSignedTransaction 2 error: ${JSON.stringify(e)}`
-      );
-      return;
-    }
+      }
+    );
 
     this.logger.debug(
       `[FAUCET] Transaction successful with nounce: hash ${createReceipt.transactionHash}, ${this.nonce}`

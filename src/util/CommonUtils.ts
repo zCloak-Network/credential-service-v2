@@ -1,5 +1,5 @@
 export class CommonUtils {
-  static async sleep(ms: number) {
+  static sleep(ms: number) {
     return new Promise(resolve => {
       setTimeout(resolve, ms);
     });
