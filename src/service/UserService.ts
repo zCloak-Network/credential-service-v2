@@ -71,7 +71,7 @@ export class UserService {
         startTime = record.timestamp;
 
         // don't await
-        await this.step(record);
+        this.step(record);
 
         // CommonUtils.sleep(1000);
       } catch (e) {
