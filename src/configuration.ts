@@ -23,21 +23,30 @@ export class ContainerLifeCycle implements ILifeCycle {
   @Config('zCloak.moonbase.url')
   chainUrl: string;
 
+  @Config('logger')
+  loggerConfig: any;
+
   @Inject()
   adminAttesterService: AdminAttesterService;
 
   async onReady(container: IMidwayContainer) {
+    console.log(
+      `current enviroment: ${this.app.getEnv()}, log dir: ${
+        this.loggerConfig.dir
+      }`
+    );
+
     this.app.createLogger('attestation', {
+      dir: this.loggerConfig.dir,
       fileLogName: 'attestation.log',
       level: 'all',
     });
 
     this.app.createLogger('faucet', {
+      dir: this.loggerConfig.dir,
       fileLogName: 'faucet.log',
       level: 'all',
     });
-
-    console.log(`Current ENVIRONMENT: ${this.app.getEnv()}`);
 
     // inject web3
     const web3 = new Web3(this.chainUrl);

@@ -43,7 +43,7 @@ export class UserService {
         );
 
         this.logger.debug(
-          `[FAUCET] FindOne from ${startTime}, length ${recordList.length}`
+          `FindOne from ${startTime}, length ${recordList.length}`
         );
 
         if (!recordList || recordList.length <= 0) {
@@ -53,19 +53,19 @@ export class UserService {
 
         const record = recordList[0];
         this.logger.debug(
-          `[FAUCET] FindOne currentTime: ${record.timestamp}, ${new Date(
+          `FindOne currentTime: ${record.timestamp}, ${new Date(
             record.timestamp
           )}`
         );
-        this.logger.debug(`[FAUCET] current local NONCE ${this.nonce}`);
+        this.logger.debug(`current local NONCE ${this.nonce}`);
         if (!this.nonce) {
           this.nonce = await this.web3.eth.getTransactionCount(
             this.addressFrom
           );
-          this.logger.debug(`[FAUCET] fetch onchain NONCE ${this.nonce}`);
+          this.logger.debug(`fetch onchain NONCE ${this.nonce}`);
         } else {
           this.nonce = this.nonce + 1;
-          this.logger.debug(`[FAUCET] use local NONCE ${this.nonce}`);
+          this.logger.debug(`use local NONCE ${this.nonce}`);
         }
 
         startTime = record.timestamp;
@@ -76,7 +76,7 @@ export class UserService {
         await CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
-        this.logger.warn(`[FAUCET] transfer error: ${JSON.stringify(e)}`);
+        this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
 
         await CommonUtils.sleep(10000);
       }
@@ -95,11 +95,9 @@ export class UserService {
     );
 
     this.logger.debug(
-      `[FAUCET] Successfully transfer money to user ${
-        record.addressTo
-      } , balance ${this.tokenNumber}, cost ${
-        new Date().getTime() - start
-      }ms, nonce ${nonce}`
+      `Successfully transfer money to user ${record.addressTo} , balance ${
+        this.tokenNumber
+      }, cost ${new Date().getTime() - start}ms, nonce ${nonce}`
     );
   }
 
@@ -161,9 +159,7 @@ export class UserService {
   // }
 
   private async doTransferToUser(addressFrom, addressTo, nonce) {
-    this.logger.debug(
-      `[FAUCET] Attempting to send transaction to ${addressTo} nonce ${nonce}`
-    );
+    this.logger.debug(`sending transaction to ${addressTo} nonce ${nonce}`);
 
     // Sign tx with PK
     const createTransaction = await this.web3.eth.accounts.signTransaction(
@@ -180,14 +176,12 @@ export class UserService {
     const createReceipt = await this.web3.eth.sendSignedTransaction(
       createTransaction.rawTransaction,
       (error, hash) => {
-        this.logger.debug(
-          `[FAUCET] hash: ${hash} , error ${JSON.stringify(error)}\n`
-        );
+        this.logger.debug(`hash: ${hash} , error ${JSON.stringify(error)}\n`);
       }
     );
 
     this.logger.debug(
-      `[FAUCET] Transaction successful with hash ${createReceipt.transactionHash}, nounce ${nonce}`
+      `Successful Transaction  with hash ${createReceipt.transactionHash}, nounce ${nonce}`
     );
   }
 
