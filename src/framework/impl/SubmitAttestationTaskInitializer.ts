@@ -19,53 +19,52 @@ export class SubmitAttestationTaskInitializer implements AppInitializer {
       .getApplicationContext()
       .getAsync<AdminAttesterService>(AdminAttesterService);
     // start task
-    new Promise(async resolve => {
-      logger.info(`${logPrefix} start attestation queue submit task`);
+    // new Promise(async resolve => {
+    logger.info(`${logPrefix} start attestation queue submit task`);
 
-      for (;;) {
-        let job = null;
+    for (;;) {
+      let job = null;
+
+      try {
+        job = await claimQueueClient.peek();
+      } catch (err) {
+        logger.warn(`${logPrefix} poll claim error\n${JSON.stringify(err)}`);
+      }
+
+      if (ObjUtils.isNotNull(job)) {
+        let claim = null;
+        const rootHash = job.rootHash;
 
         try {
-          job = await claimQueueClient.peek();
+          claim = await adminAttesterService.getClaimByRootHash(rootHash);
         } catch (err) {
-          logger.warn(`${logPrefix} poll claim error\n${JSON.stringify(err)}`);
+          logger.warn(
+            `${logPrefix} get claim by rootHash error ${rootHash}\n${JSON.stringify(
+              err
+            )}`
+          );
         }
 
-        if (ObjUtils.isNotNull(job)) {
-          let claim = null;
-          const rootHash = job.rootHash;
+        if (ObjUtils.isNotNull(claim)) {
+          const claimRequest = new SubmitClaimRequest();
+          claimRequest.ciphertext = claim.ciphertext;
+          claimRequest.nonce = claim.nonce;
+          claimRequest.senderKeyId = claim.senderKeyId;
+          claimRequest.receiverKeyId = claim.receiverKeyId;
 
           try {
-            claim = await adminAttesterService.getClaimByRootHash(rootHash);
+            await adminAttesterService.submitClaimSync(claimRequest);
           } catch (err) {
-            logger.warn(
-              `${logPrefix} get claim by rootHash error ${rootHash}\n${JSON.stringify(
-                err
-              )}`
-            );
-          }
-
-          if (ObjUtils.isNotNull(claim)) {
-            const claimRequest = new SubmitClaimRequest();
-            claimRequest.ciphertext = claim.ciphertext;
-            claimRequest.nonce = claim.nonce;
-            claimRequest.senderKeyId = claim.senderKeyId;
-            claimRequest.receiverKeyId = claim.receiverKeyId;
-
-            try {
-              await adminAttesterService.submitClaimSync(claimRequest);
-            } catch (err) {
-              logger.error(`${logPrefix} error\n${JSON.stringify(err)}`);
-            } finally {
-              await claimQueueClient.poll();
-            }
+            logger.error(`${logPrefix} error\n${JSON.stringify(err)}`);
+          } finally {
+            await claimQueueClient.poll();
           }
         }
-
-        // const waitTime = 1;
-        await CommonUtils.sleep(100);
+      } else {
+        await CommonUtils.sleep(5000);
       }
-    });
-    return Promise.resolve(undefined);
+    }
+    // });
+    // return Promise.resolve(undefined);
   }
 }

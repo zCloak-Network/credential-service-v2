@@ -50,7 +50,7 @@ export class UserController {
     .build()
   @Get('/faucet')
   async getFaucet(@Query('address') address: string) {
-    const result = await this.userService.transferToUser(address);
+    const result = await this.userService.add(address);
     if (result === -1) {
       return ResultVO.error('repeat get token');
     }
