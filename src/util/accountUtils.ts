@@ -1,13 +1,13 @@
-import * as Kilt from "@kiltprotocol/sdk-js";
-
-const keyring = new Kilt.Utils.Keyring({
-  ss58Format: 38,
-  type: "sr25519",
-});
+import * as Kilt from '@kiltprotocol/sdk-js';
 
 export async function generateAccount(
   mnemonic: string
 ): Promise<Kilt.KeyringPair> {
+  const keyring = new Kilt.Utils.Keyring({
+    ss58Format: 38,
+    type: 'sr25519',
+  });
+
   return keyring.addFromMnemonic(mnemonic);
 }
 
