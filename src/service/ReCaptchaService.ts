@@ -26,11 +26,10 @@ export class ReCaptchaService {
         data: `secret=${this.reCaptchaConfig.secretKey}&response=${token}`,
       });
 
-      // this.logger.info(`reCaptcha Verify Result: ${JSON.stringify(data)}`);
-
       if (data && data.success) {
         return true;
       } else {
+        this.logger.info(`reCaptcha Verify Result: ${JSON.stringify(data)}`);
         return false;
       }
     } catch (e) {

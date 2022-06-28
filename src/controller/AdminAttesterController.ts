@@ -58,42 +58,42 @@ export class AdminAttesterController {
     return ResultVO.success({ attestationStatus });
   }
 
-  @CreateApiDoc()
-    .summary('submit for get credential')
-    .description(
-      'submit user input claim, generate credential by system admin attester'
-    )
-    .param('user entered claim entity')
-    .respond(200, 'system generated credential', 'json', {
-      example: {
-        code: 200,
-        data: {},
-      },
-    })
-    .build()
-  @Post('/submit-claim')
-  async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
-    // 废弃该接口
-    return ResultVO.error('verify failed.');
+  // @CreateApiDoc()
+  //   .summary('submit for get credential')
+  //   .description(
+  //     'submit user input claim, generate credential by system admin attester'
+  //   )
+  //   .param('user entered claim entity')
+  //   .respond(200, 'system generated credential', 'json', {
+  //     example: {
+  //       code: 200,
+  //       data: {},
+  //     },
+  //   })
+  //   .build()
+  // @Post('/submit-claim')
+  // async submitClaim(@Body(ALL) submitClaimRequest: SubmitClaimRequest) {
+  //   // 废弃该接口
+  //   return ResultVO.error('verify failed.');
 
-    const ip = this.ctx.request.headers['x-real-ip'];
-    if (
-      !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
-    ) {
-      this.logger.warn(`verify failed, ip:${ip}`);
-      return ResultVO.error('verify failed.');
-    }
+  //   const ip = this.ctx.request.headers['x-real-ip'];
+  //   if (
+  //     !(await this.reCaptchaService.verify(submitClaimRequest.reCaptchaToken))
+  //   ) {
+  //     this.logger.warn(`verify failed, ip:${ip}`);
+  //     return ResultVO.error('verify failed.');
+  //   }
 
-    this.logger.info(`SubmitClaim  x-real-ip > ${ip}`);
+  //   this.logger.info(`SubmitClaim  x-real-ip > ${ip}`);
 
-    if (ip === '47.243.120.137' || ip === '60.157.127.89') {
-      this.logger.info(`illegal  x-real-ip > ${ip}`);
-      return;
-    }
+  //   if (ip === '47.243.120.137' || ip === '60.157.127.89') {
+  //     this.logger.info(`illegal  x-real-ip > ${ip}`);
+  //     return;
+  //   }
 
-    await this.adminAttesterService.submitClaim(submitClaimRequest);
-    return ResultVO.success();
-  }
+  //   await this.adminAttesterService.submitClaim(submitClaimRequest);
+  //   return ResultVO.success();
+  // }
 
   @CreateApiDoc()
     .summary('submit claim')
