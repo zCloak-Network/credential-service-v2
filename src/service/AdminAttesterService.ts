@@ -6,14 +6,8 @@ import { InjectEntityModel } from '@midwayjs/orm';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { Repository } from 'typeorm';
 import { AppConstant } from '../constant/AppConstant';
-import {
-  notSubmit,
-  submitFailure,
-  submitSuccess,
-  submitting,
-} from '../constant/attestationStatus';
+import { notSubmit } from '../constant/attestationStatus';
 import { Attestation } from '../entity/Attestation';
-import { Claim } from '../entity/Claim';
 import { Claim as ClaimEntity } from '../entity/mysql/Claim';
 import { ClaimQueue } from '../queue/impl/ClaimQueue';
 import { IQueueClient } from '../queue/IQueueClient';
