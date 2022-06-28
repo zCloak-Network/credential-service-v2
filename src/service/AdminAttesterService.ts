@@ -60,13 +60,26 @@ export class AdminAttesterService {
     await Kilt.init({ address: this.wssAddress });
   }
 
+  convertToEncryptedMessage(request: SubmitClaimRequest) {
+    const m: Kilt.IEncryptedMessage = {
+      ciphertext: request.ciphertext,
+      nonce: request.nonce,
+      senderKeyUri: request.senderKeyId as any,
+      receiverKeyUri: request.receiverKeyId as any,
+    };
+    this.logger.debug(
+      `convert senderKeyUri ${m.senderKeyUri}, receiverKeyUri ${m.receiverKeyUri}  `
+    );
+    return m;
+  }
+
   async submitClaimToQueue(submitClaimRequest: SubmitClaimRequest) {
     const keystore = new Kilt.Did.DemoKeystore();
     await generateFullKeypairs(keystore, this.mnemonic);
 
-    const fullDid = await getFullDid(this.address);
+    const fullDid = await getFullDid(this.didUri as Kilt.DidUri);
     const message = await this.decryptMessage(
-      submitClaimRequest,
+      this.convertToEncryptedMessage(submitClaimRequest),
       fullDid,
       keystore
     );
@@ -224,8 +237,8 @@ export class AdminAttesterService {
   //   // );
   // }
 
-  private async decryptMessage(
-    submitClaimRequest: SubmitClaimRequest,
+  async decryptMessage(
+    submitClaimRequest: Kilt.IEncryptedMessage,
     fullDid: Kilt.Did.FullDidDetails,
     keystore: NaclBoxCapable
   ) {
@@ -308,11 +321,11 @@ export class AdminAttesterService {
     await generateFullKeypairs(keystore, this.mnemonic);
 
     // this.logger.debug(`[Queue] submit attestation > get full did`);
-    const fullDid = await getFullDid(this.address);
+    const fullDid = await getFullDid(this.didUri as Kilt.DidUri);
 
     // this.logger.debug(`[Queue] submit attestation > decrypt claim message`);
     const message = await this.decryptMessage(
-      submitClaimRequest,
+      this.convertToEncryptedMessage(submitClaimRequest),
       fullDid,
       keystore
     );
@@ -325,7 +338,8 @@ export class AdminAttesterService {
     const request = (message.body.content as any).requestForAttestation;
     const attestation = Kilt.Attestation.fromRequestAndDid(
       request,
-      this.didUri
+      // this.didUri
+      fullDid.uri
     );
 
     const claimHash = request.rootHash;
@@ -422,7 +436,8 @@ export class AdminAttesterService {
 
     const attestationMessage = new Kilt.Message(
       messageBody as MessageBody,
-      this.didUri,
+      // this.didUri,
+      fullDid.uri,
       message.sender
     );
 
@@ -433,7 +448,9 @@ export class AdminAttesterService {
       userDid.assembleKeyId(userDid.encryptionKey!.id)
     );
 
-    await this.attestationService.save(encryptMessage as Attestation);
+    await this.attestationService.save(
+      encryptMessage as unknown as Attestation
+    );
     await this.updateClaimStatus(claimHash, 2);
   }
 

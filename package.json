@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
-    "@kiltprotocol/sdk-js": "^0.26.0",
+    "@kiltprotocol/sdk-js": "^0.28.0",
     "@midwayjs/bootstrap": "^2.3.0",
     "@midwayjs/core": "^2.3.0",
     "@midwayjs/decorator": "^2.3.0",

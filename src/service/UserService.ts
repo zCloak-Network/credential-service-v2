@@ -161,12 +161,18 @@ export class UserService {
   private async doTransferToUser(addressFrom, addressTo, nonce) {
     this.logger.debug(`sending transaction to ${addressTo} nonce ${nonce}`);
 
+    this.logger.debug(
+      `sending transaction to ${addressTo} toCheckSum ${this.web3.utils.toChecksumAddress(
+        addressTo
+      )}`
+    );
+
     // Sign tx with PK
     const createTransaction = await this.web3.eth.accounts.signTransaction(
       {
         nonce: nonce,
         gas: this.gas,
-        to: addressTo,
+        to: this.web3.utils.toChecksumAddress(addressTo),
         value: this.web3.utils.toWei(this.tokenNumber, 'ether'),
       },
       this.privateKey

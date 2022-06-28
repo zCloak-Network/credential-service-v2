@@ -12,9 +12,9 @@ export async function generateAccount(
 }
 
 export async function getFullDid(
-  didIdentifier: Kilt.IDidIdentifier
+  didUri: Kilt.DidUri
 ): Promise<Kilt.Did.FullDidDetails> {
-  return await Kilt.Did.FullDidDetails.fromChainInfo(didIdentifier);
+  return await Kilt.Did.FullDidDetails.fromChainInfo(didUri);
 }
 
 export async function generateFullKeypairs(
