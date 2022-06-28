@@ -441,11 +441,16 @@ export class AdminAttesterService {
       message.sender
     );
 
+    this.logger.warn(`userDid ${userDid.identifier}`);
+    this.logger.warn(
+      `userDid ${userDid.assembleKeyUri(userDid.encryptionKey!.id)}`
+    );
+    this.logger.warn(`userDid ${userDid.uri}`);
     const encryptMessage = await attestationMessage.encrypt(
       fullDid.encryptionKey!.id,
       fullDid,
       keystore,
-      userDid.assembleKeyId(userDid.encryptionKey!.id)
+      userDid.assembleKeyUri(userDid.encryptionKey!.id)
     );
 
     await this.attestationService.save(
