@@ -1,4 +1,12 @@
-import { Config, Inject, Logger, Provide } from '@midwayjs/decorator';
+import {
+  Config,
+  Init,
+  Inject,
+  Logger,
+  Provide,
+  Scope,
+  ScopeEnum,
+} from '@midwayjs/decorator';
 import Web3 from 'web3';
 import { Transfer } from '../entity/Transfer';
 import { TransferService } from './TransferService';
@@ -8,6 +16,7 @@ import { CommonUtils } from '../util/CommonUtils';
 import { ObjUtils } from '../util/ObjUtils';
 
 @Provide()
+@Scope(ScopeEnum.Singleton)
 export class UserService {
   @Config('zCloak.moonbase.privateKey')
   privateKey: string;
@@ -21,7 +30,6 @@ export class UserService {
   @Config('zCloak.moonbase.gas')
   gas: string;
 
-  @Inject()
   web3: Web3;
 
   @Logger('faucet')
@@ -31,6 +39,15 @@ export class UserService {
   transferService: TransferService;
 
   nonce: number;
+
+  @Config('zCloak.moonbase.url')
+  chainUrl: string;
+
+  @Init()
+  init() {
+    this.web3 = new Web3(this.chainUrl);
+    console.log('initialized web3...');
+  }
 
   async polling() {
     this.logger.debug('faucet start polling...');

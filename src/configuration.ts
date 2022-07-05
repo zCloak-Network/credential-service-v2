@@ -4,9 +4,7 @@ import { Application } from 'egg';
 import { join } from 'path';
 import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
-import Web3 from 'web3';
 import * as orm from '@midwayjs/orm';
-// import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
 import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
 import { UserService } from './service/UserService';
@@ -20,8 +18,8 @@ export class ContainerLifeCycle implements ILifeCycle {
   @App()
   app: Application;
 
-  @Config('zCloak.moonbase.url')
-  chainUrl: string;
+  // @Config('zCloak.moonbase.url')
+  // chainUrl: string;
 
   @Config('logger')
   loggerConfig: any;
@@ -49,18 +47,20 @@ export class ContainerLifeCycle implements ILifeCycle {
     });
 
     // inject web3
-    const web3 = new Web3(this.chainUrl);
-    container.registerObject('web3', web3);
+    // const web3 = new Web3(this.chainUrl);
+    // container.registerObject('web3', web3);
 
     // await AppInitializerHelper.init(this.app);
-
-    // kilt queue, don't await
     new SubmitAttestationTaskInitializer().doInit(this.app);
 
     const userService = await this.app
       .getApplicationContext()
       .getAsync<UserService>(UserService);
-    // faucet queue, don't await
     userService.polling();
+
+    // const faucetQueueService = await this.app
+    //   .getApplicationContext()
+    //   .getAsync(FaucetQueueService);
+    // faucetQueueService.addTask({ address: '000' });
   }
 }
