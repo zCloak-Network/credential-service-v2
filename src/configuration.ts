@@ -7,6 +7,7 @@ import * as swagger from '@midwayjs/swagger';
 import * as orm from '@midwayjs/orm';
 import { AdminAttesterService } from './service/AdminAttesterService';
 import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
+import { CTypeScanTaskService } from './service/impl/CTypeScanTaskService';
 import { UserService } from './service/UserService';
 
 @Configuration({
@@ -46,12 +47,23 @@ export class ContainerLifeCycle implements ILifeCycle {
       level: 'all',
     });
 
+    this.app.createLogger('ctype-scan', {
+      dir: this.loggerConfig.dir,
+      fileLogName: 'ctype-scan.log',
+      level: 'all',
+    });
+
     // inject web3
     // const web3 = new Web3(this.chainUrl);
     // container.registerObject('web3', web3);
 
     // await AppInitializerHelper.init(this.app);
     new SubmitAttestationTaskInitializer().doInit(this.app);
+
+    const cTypeScanTaskService = await this.app
+      .getApplicationContext()
+      .getAsync<CTypeScanTaskService>(CTypeScanTaskService);
+    cTypeScanTaskService.doTask();
 
     const userService = await this.app
       .getApplicationContext()

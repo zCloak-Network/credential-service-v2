@@ -53,4 +53,19 @@ export class CTypeService {
       await this.rowScanCTypeModel.create(cType);
     }
   }
+
+  async countCTypeOnChain() {
+    return await this.rowScanCTypeModel.count().exec();
+  }
+
+  async listAllCTypeHashOnChain() {
+    const cTypes = await this.rowScanCTypeModel.find().exec();
+    if (cTypes && cTypes.length > 0) {
+      return cTypes.map(cType => {
+        const obj = cType.toObject();
+        return obj.ctypeHash;
+      });
+    }
+    return null;
+  }
 }
