@@ -1,8 +1,20 @@
 import axios from 'axios';
+import { RequestApiConstant } from '../constant/RequestApiConstant';
 
 type RequestMethod = 'get' | 'post';
 
 export class RequestApi {
+  // end with ''
+  baseUrl: string;
+
+  constructor(baseUrl: string) {
+    if (baseUrl.endsWith('/')) {
+      this.baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    } else {
+      this.baseUrl = baseUrl;
+    }
+  }
+
   getHeaders() {
     return {
       'Content-Type': 'application/json',
@@ -14,14 +26,19 @@ export class RequestApi {
   }
 
   async request(url: string, method: RequestMethod, params?: any, data?: any) {
+    let path = this.baseUrl;
+    if (!url.startsWith('/')) {
+      path = `${path}/`;
+    }
     const headers = this.getHeaders();
+
     return new Promise((resolve, reject) => {
-      axios(url, {
+      axios(`${path}${url}`, {
         method,
         headers,
         params,
         data,
-        timeout: 3000,
+        timeout: RequestApiConstant.DEFAULT_TIMEOUT,
       })
         .then(res => {
           return res.data;

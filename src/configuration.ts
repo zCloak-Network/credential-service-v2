@@ -6,10 +6,10 @@ import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
 import Web3 from 'web3';
 import * as orm from '@midwayjs/orm';
-import { CTypeScanTaskInitializer } from './framework/impl/CTypeScanTaskInitializer';
 // import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
 import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
+import { CTypeScanTaskService } from './service/impl/CTypeScanTaskService';
 import { UserService } from './service/UserService';
 
 @Configuration({
@@ -64,8 +64,10 @@ export class ContainerLifeCycle implements ILifeCycle {
     // kilt queue, don't await
     new SubmitAttestationTaskInitializer().doInit(this.app);
 
-    // dont await
-    new CTypeScanTaskInitializer().doInit(this.app);
+    const cTypeScanTaskService = await this.app
+      .getApplicationContext()
+      .getAsync<CTypeScanTaskService>(CTypeScanTaskService);
+    cTypeScanTaskService.doTask();
 
     const userService = await this.app
       .getApplicationContext()

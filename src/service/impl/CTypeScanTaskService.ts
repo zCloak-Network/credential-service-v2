@@ -1,56 +1,53 @@
 import * as Kilt from '@kiltprotocol/sdk-js';
+import { Config, Init, Inject, Logger, Provide } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
-import { CTypeService } from '../../service/CTypeService';
+import { CTypeScanConstant } from '../../constant/CTypeScanConstant';
+import { SubScanRequestApi } from '../../util/SubScanRequestApi';
+import { ITaskService } from '../ITaskService';
 import { ArrUtils } from '../../util/ArrUtils';
 import { CommonUtils } from '../../util/CommonUtils';
 import { RequestApi } from '../../util/RequestApi';
-import { ITask } from '../ITask';
-import { SubScanRequestApi } from './SubScanRequestApi';
+import { CTypeService } from '../CTypeService';
 
-export class CTypeScanTask implements ITask {
-  requestApi: RequestApi;
+@Provide()
+export class CTypeScanTaskService implements ITaskService {
+  @Config('zCloak.scan.cType.subScanTokens')
+  subScanTokens: string[];
 
-  defaultWaitTime: number;
-  defaultErrorWaitTime: number;
-
-  lastCountFile: string;
-
-  modelId: string;
-  eventId: string;
-
+  @Config('zCloak.scan.cType.subScanBaseUrl')
   subScanBaseUrl: string;
 
-  defaultRowCount: number;
-
+  @Logger('ctype-scan')
   logger: ILogger;
+
+  @Inject()
   cTypeService: CTypeService;
 
   alreadyGetCTypeHashes: Set<string>;
 
-  constructor(config: any) {
-    this.requestApi = new SubScanRequestApi(config.subScanTokens);
+  requestApi: RequestApi;
 
-    this.defaultWaitTime = config.defaultWaitTime;
-    this.defaultErrorWaitTime = config.defaultErrorWaitTime;
+  @Init()
+  async init() {
+    // init request api
+    this.requestApi = new SubScanRequestApi(
+      this.subScanBaseUrl,
+      this.subScanTokens
+    );
 
-    this.lastCountFile = config.lastCountFileName;
-
-    this.modelId = config.modelId;
-    this.eventId = config.eventId;
-
-    this.subScanBaseUrl = config.subScanBaseUrl;
-
-    this.defaultRowCount = config.defaultRowCount;
-
-    this.logger = config.logger;
-    this.cTypeService = config.cTypeService;
+    // load all ctype hash
+    const alreadyGetCTypeHashes =
+      (await this.cTypeService.listAllCTypeHashOnChain()) || [];
+    this.alreadyGetCTypeHashes = new Set(alreadyGetCTypeHashes);
+    this.logger.info(
+      `list all on chain ctype hash size ${this.alreadyGetCTypeHashes.size}`
+    );
   }
 
   async doTask(): Promise<void> {
     this.logger.info('CTypeScanTask start...');
-    await this.init();
 
-    let lastCount = await this.getLastCount();
+    let lastCount = 1;
 
     for (;;) {
       try {
@@ -58,9 +55,9 @@ export class CTypeScanTask implements ITask {
 
         if (lastCount >= currentCount) {
           this.logger.warn(
-            `start scan lastCount >= currentCount, lastCount ${lastCount} currentCount ${currentCount}`
+            `start scan lastCount >= currentCount, lastCount ${lastCount} currentCount ${currentCount}, continue in ${CTypeScanConstant.DEFAULT_WAIT_TIME}ms`
           );
-          await CommonUtils.sleep(this.defaultWaitTime);
+          await CommonUtils.sleep(CTypeScanConstant.DEFAULT_WAIT_TIME);
           continue;
         }
 
@@ -73,17 +70,9 @@ export class CTypeScanTask implements ITask {
         this.logger.error(
           `start error lastCount ${lastCount}\n${JSON.stringify(err)}`
         );
-        await CommonUtils.sleep(this.defaultErrorWaitTime);
+        await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
       }
     }
-  }
-
-  private async init() {
-    const alreadyGetCTypeHashes = await this.listAllCTypeHashes();
-    this.alreadyGetCTypeHashes = new Set(alreadyGetCTypeHashes);
-    this.logger.info(
-      `list all on chain ctype hash size ${this.alreadyGetCTypeHashes.size}`
-    );
   }
 
   private async getCTypeFromEvent(events: any) {
@@ -92,7 +81,8 @@ export class CTypeScanTask implements ITask {
     const cTypeEvents = events.filter(
       (value: { module_id: string; event_id: string }) => {
         return (
-          this.modelId === value.module_id && this.eventId === value.event_id
+          CTypeScanConstant.MODEL_ID === value.module_id &&
+          CTypeScanConstant.EVENT_ID === value.event_id
         );
       }
     );
@@ -117,7 +107,7 @@ export class CTypeScanTask implements ITask {
             extrinsicHash
           );
           const metadata = await this.getMetadata(extrinsic, ctypeHash);
-          const owner = await this.getOwner(extrinsic);
+          const owner = extrinsic?.id;
 
           const cType: CType = {
             metadata,
@@ -133,14 +123,10 @@ export class CTypeScanTask implements ITask {
         i++;
       } catch (err) {
         this.logger.error(`build ${i} ctype error\n${JSON.stringify(err)}`);
-        await CommonUtils.sleep(this.defaultErrorWaitTime);
+        await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
       }
     }
     return cTypes;
-  }
-
-  private async getOwner(extrinsic: any) {
-    return extrinsic?.id;
   }
 
   private async getMetadata(extrinsic: any, ctypeHash: string) {
@@ -184,7 +170,7 @@ export class CTypeScanTask implements ITask {
     );
 
     const result: any = await this.requestApi.post(
-      `${this.subScanBaseUrl}/api/scan/extrinsic`,
+      '/api/scan/extrinsic',
       null,
       {
         extrinsic_index: extrinsicIndex,
@@ -201,20 +187,20 @@ export class CTypeScanTask implements ITask {
     );
 
     const maxPage = parseInt(
-      (currentCount - lastCount) / this.defaultRowCount + ''
+      (currentCount - lastCount) / CTypeScanConstant.DEFAULT_ROW_COUNT + ''
     );
-    const row = this.defaultRowCount;
+    const row = CTypeScanConstant.DEFAULT_ROW_COUNT;
     let i = 0;
 
     while (i <= maxPage) {
       try {
         const result: any = await this.requestApi.post(
-          `${this.subScanBaseUrl}/api/scan/events`,
+          '/api/scan/events',
           null,
           {
             page: i,
             row,
-            module: this.modelId,
+            module: CTypeScanConstant.MODEL_ID,
           }
         );
 
@@ -233,7 +219,7 @@ export class CTypeScanTask implements ITask {
         this.logger.error(
           `scan error ${i}, lastCount ${lastCount}, currentCount ${currentCount}`
         );
-        await CommonUtils.sleep(this.defaultErrorWaitTime);
+        await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
       }
     }
   }
@@ -244,7 +230,9 @@ export class CTypeScanTask implements ITask {
       while (i < cTypes.length) {
         const cType = cTypes[i];
         try {
-          const ct = await this.getCType(cType.ctypeHash);
+          const ct = await this.cTypeService.getByCTypeHashFromChain(
+            cType.ctypeHash
+          );
           if (ct) {
             this.logger.debug(
               `${i} ctype is existed, dont save ${cType.ctypeHash}`
@@ -258,7 +246,7 @@ export class CTypeScanTask implements ITask {
           i++;
         } catch (err) {
           this.logger.error(`handle ${i} ctype error\n${JSON.stringify(err)}`);
-          await CommonUtils.sleep(this.defaultErrorWaitTime);
+          await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
         }
       }
     }
@@ -268,33 +256,14 @@ export class CTypeScanTask implements ITask {
     return this.cTypeService.saveOnChainCType(ctype);
   }
 
-  private async getCType(ctypeHash: string) {
-    return await this.cTypeService.getByCTypeHashFromChain(ctypeHash);
-  }
-
-  private async getLastCount() {
-    // TODO can't find the startCount when program restart, because of the paging model that the lately data in the lately page.
-    // now, we use already handle ctype for caching
-    // return (await this.cTypeService.countRowCType()) || 1;
-    return 1;
-  }
-
   private async getCount() {
-    const result: any = await this.requestApi.post(
-      `${this.subScanBaseUrl}/api/scan/events`,
-      null,
-      {
-        page: 0,
-        row: 1,
-        module: 'ctype',
-      }
-    );
+    const result: any = await this.requestApi.post('/api/scan/events', null, {
+      page: 0,
+      row: 1,
+      module: CTypeScanConstant.MODEL_ID,
+    });
 
     return result.count;
-  }
-
-  private async listAllCTypeHashes() {
-    return await this.cTypeService.listAllCTypeHashOnChain();
   }
 }
 
