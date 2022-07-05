@@ -6,6 +6,7 @@ import * as typegoose from '@midwayjs/typegoose';
 import * as swagger from '@midwayjs/swagger';
 import Web3 from 'web3';
 import * as orm from '@midwayjs/orm';
+import { CTypeScanTaskInitializer } from './framework/impl/CTypeScanTaskInitializer';
 // import { AppInitializerHelper } from './framework/AppInitializerHelper';
 import { AdminAttesterService } from './service/AdminAttesterService';
 import { SubmitAttestationTaskInitializer } from './framework/impl/SubmitAttestationTaskInitializer';
@@ -48,6 +49,12 @@ export class ContainerLifeCycle implements ILifeCycle {
       level: 'all',
     });
 
+    this.app.createLogger('ctype-scan', {
+      dir: this.loggerConfig.dir,
+      fileLogName: 'ctype-scan.log',
+      level: 'all',
+    });
+
     // inject web3
     const web3 = new Web3(this.chainUrl);
     container.registerObject('web3', web3);
@@ -56,6 +63,9 @@ export class ContainerLifeCycle implements ILifeCycle {
 
     // kilt queue, don't await
     new SubmitAttestationTaskInitializer().doInit(this.app);
+
+    // dont await
+    new CTypeScanTaskInitializer().doInit(this.app);
 
     const userService = await this.app
       .getApplicationContext()

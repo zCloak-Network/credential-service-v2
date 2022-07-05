@@ -65,6 +65,21 @@ export const zCloak = {
     address: '',
     privateKey: '',
   },
+  scan: {
+    cType: {
+      subScanBaseUrl: 'https://kilt-testnet.api.subscan.io',
+      subScanTokens: [
+        '',
+        '',
+        '',
+      ],
+      modelId: 'ctype',
+      eventId: 'CTypeCreated',
+      defaultRowCount: 10,
+      defaultErrorWaitTime: 2000,
+      defaultWaitTime: 10000,
+    },
+  },
 };
 ```
 
