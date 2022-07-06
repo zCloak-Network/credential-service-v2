@@ -45,6 +45,16 @@ export const orm = {
 };
 ```
 
+#### google recaptcha
+
+```typescript
+export const recaptcha = {
+  host: 'https://www.google.com/recaptcha/api/siteverify',
+  siteKey: '',
+  secretKey: '',
+};
+```
+
 #### application internal config
 
 ```typescript
@@ -73,11 +83,6 @@ export const zCloak = {
         '',
         '',
       ],
-      modelId: 'ctype',
-      eventId: 'CTypeCreated',
-      defaultRowCount: 10,
-      defaultErrorWaitTime: 2000,
-      defaultWaitTime: 10000,
     },
   },
 };
