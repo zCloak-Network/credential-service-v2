@@ -39,18 +39,21 @@ export class ContainerLifeCycle implements ILifeCycle {
       dir: this.loggerConfig.dir,
       fileLogName: 'attestation.log',
       level: 'all',
+      defaultLabel: 'attestation',
     });
 
     this.app.createLogger('faucet', {
       dir: this.loggerConfig.dir,
       fileLogName: 'faucet.log',
       level: 'all',
+      defaultLabel: 'faucet',
     });
 
     this.app.createLogger('ctype-scan', {
       dir: this.loggerConfig.dir,
       fileLogName: 'ctype-scan.log',
       level: 'all',
+      defaultLabel: 'ctype-scan',
     });
 
     // inject web3
