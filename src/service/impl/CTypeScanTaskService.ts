@@ -54,7 +54,7 @@ export class CTypeScanTaskService implements ITaskService {
         const currentCount = await this.getCount();
 
         if (lastCount >= currentCount) {
-          this.logger.warn(
+          this.logger.debug(
             `start scan lastCount >= currentCount, lastCount ${lastCount} currentCount ${currentCount}, continue in ${CTypeScanConstant.DEFAULT_WAIT_TIME}ms`
           );
           await CommonUtils.sleep(CTypeScanConstant.DEFAULT_WAIT_TIME);
@@ -117,7 +117,7 @@ export class CTypeScanTaskService implements ITaskService {
 
           cTypes.push(cType);
         } else {
-          this.logger.warn(`${i} ctypeHash already handle ${ctypeHash}, skip`);
+          this.logger.debug(`${i} ctypeHash already handle ${ctypeHash}, skip`);
         }
 
         i++;
