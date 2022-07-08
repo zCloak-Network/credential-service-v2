@@ -1,7 +1,6 @@
-import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
 import { loggers } from '@midwayjs/logger';
+import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
 import { ResultVO } from '../vo/ResultVO';
-import { JsonUtils } from '../util/JsonUtils';
 
 export type DefaultConfig = PowerPartial<EggAppConfig>;
 
@@ -23,15 +22,17 @@ export default (appInfo: EggAppInfo) => {
   // cors
   config.cors = {
     origin: '*',
-    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
   };
 
   // global error handler
   config.onerror = {
     all(err, ctx) {
-      loggers.getLogger('logger').warn('url: %s, error is: %s', ctx.originalUrl, err)
+      loggers
+        .getLogger('logger')
+        .warn('url: %s, error is: %s', ctx.originalUrl, err);
 
-      const resultVO = ResultVO.error(JsonUtils.toUnicode(err.message));
+      const resultVO = ResultVO.error(err?.message);
       ctx.body = JSON.stringify(resultVO);
       ctx.status = 200;
     },
