@@ -9,12 +9,11 @@ import {
   Query,
 } from '@midwayjs/decorator';
 import { CreateApiDoc } from '@midwayjs/swagger';
+import { Claim } from '../entity/Claim';
+import { SaveClaimRequest } from '../request/SaveClaimRequest';
 import { ClaimService } from '../service/ClaimService';
 import { MessageService } from '../service/MessageService';
 import { ResultVO } from '../vo/ResultVO';
-import { Claim } from '../entity/Claim';
-import { Claim as ClaimEntity } from '../entity/mysql/Claim';
-import { SaveClaimRequest } from '../request/SaveClaimRequest';
 
 @Provide()
 @Controller('/message')
@@ -45,22 +44,20 @@ export class MessageController {
     .build()
   @Post('/add')
   async save(@Body(ALL) claimReq: SaveClaimRequest) {
-    const claim = claimReq as Claim;
+    const { ciphertext, nonce, senderKeyId, receiverKeyId } = claimReq;
+    const claim = new Claim();
+    claim.ciphertext = ciphertext;
+    claim.nonce = nonce;
+    claim.senderKeyId = senderKeyId;
+    claim.receiverKeyId = receiverKeyId;
+
     await this.claimService.save(claim);
     return ResultVO.success();
   }
 
   @Post('/')
   async saveMessage(@Body(ALL) claimReq: SaveClaimRequest) {
-    const { ciphertext, senderKeyId, receiverKeyId, nonce } = claimReq;
-    const claim = new ClaimEntity();
-    claim.ciphertext = ciphertext;
-    claim.senderKeyId = senderKeyId;
-    claim.receiverKeyId = receiverKeyId;
-    claim.nonce = nonce;
-
-    await this.messageService.save(claim);
-    return ResultVO.success();
+    return await this.messageService.saveAndVerify(claimReq);
   }
 
   @Get('/')

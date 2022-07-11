@@ -12,4 +12,6 @@ export class SaveClaimRequest {
   senderKeyId: string;
   @Rule(RuleType.string())
   receiverKeyId: string;
+  @Rule(RuleType.string())
+  reCaptchaToken: string;
 }
