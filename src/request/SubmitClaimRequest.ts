@@ -1,3 +1,4 @@
+import { IDidDetails } from '@kiltprotocol/types';
 import { Rule } from '@midwayjs/decorator';
 import { RuleType } from '@midwayjs/decorator/dist/annotation/rule';
 import { CreateApiPropertyDoc } from '@midwayjs/swagger';
@@ -17,11 +18,11 @@ export class SubmitClaimRequest {
 
   @CreateApiPropertyDoc('sender key')
   @Rule(RuleType.string())
-  senderKeyId: string;
+  senderKeyId: IDidDetails['uri'];
 
   @CreateApiPropertyDoc('receiver key')
   @Rule(RuleType.string())
-  receiverKeyId: string;
+  receiverKeyId: IDidDetails['uri'];
 
   @CreateApiPropertyDoc('reCaptcha Token')
   @Rule(RuleType.string())

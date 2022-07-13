@@ -1,12 +1,16 @@
+import { IDidDetails } from '@kiltprotocol/types';
 import { Inject, Logger, Provide } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
 import { InjectEntityModel } from '@midwayjs/orm';
 import { Context } from '@midwayjs/web';
 import { MoreThan, Repository } from 'typeorm';
-import { Claim as ClaimEntity, Claim } from '../entity/mysql/Claim';
+
+import { Claim } from '../entity/mysql/Claim';
 import { SaveClaimRequest } from '../request/SaveClaimRequest';
 import { ArrUtils } from '../util/ArrUtils';
+import { KiltUtils } from '../util/KiltUtils';
 import { ResultVO } from '../vo/ResultVO';
+import { MessagePushService } from './MessagePushService';
 import { ReCaptchaService } from './ReCaptchaService';
 
 @Provide()
@@ -23,6 +27,9 @@ export class MessageService {
   @Inject()
   reCaptchaService: ReCaptchaService;
 
+  @Inject()
+  messagePushService: MessagePushService;
+
   async saveAndVerify(claimReq: SaveClaimRequest) {
     const { ciphertext, senderKeyId, receiverKeyId, nonce, reCaptchaToken } =
       claimReq;
@@ -34,13 +41,18 @@ export class MessageService {
       this.logger.warn(`verify failed, ip:${ip}`);
       return ResultVO.error('verify failed.');
     }
-    const claim = new ClaimEntity();
+
+    const claim = new Claim();
     claim.ciphertext = ciphertext;
     claim.senderKeyId = senderKeyId;
     claim.receiverKeyId = receiverKeyId;
+    claim.senderAddress = KiltUtils.getAddressFromDidUri(senderKeyId);
+    claim.receiverAddress = KiltUtils.getAddressFromDidUri(receiverKeyId);
     claim.nonce = nonce;
 
     await this.claimRepository.save(claim);
+    await this.messagePushService.sendMessage(claim);
+
     return ResultVO.success(claim);
   }
 
@@ -49,8 +61,8 @@ export class MessageService {
   }
 
   async listMessage(
-    receiverKeyId: string,
-    senderKeyId: string,
+    receiverKeyId: IDidDetails['uri'],
+    senderKeyId: IDidDetails['uri'],
     startId: number,
     size: number
   ) {

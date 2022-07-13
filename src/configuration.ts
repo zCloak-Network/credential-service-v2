@@ -56,6 +56,13 @@ export class ContainerLifeCycle implements ILifeCycle {
       defaultLabel: 'ctype-scan',
     });
 
+    this.app.createLogger('message-push', {
+      dir: this.loggerConfig.dir,
+      fileLogName: 'message-push.log',
+      level: 'all',
+      defaultLabel: 'message-push',
+    });
+
     // inject web3
     // const web3 = new Web3(this.chainUrl);
     // container.registerObject('web3', web3);

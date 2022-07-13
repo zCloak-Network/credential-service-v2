@@ -1,3 +1,4 @@
+import { IDidDetails } from '@kiltprotocol/types';
 import {
   ALL,
   Body,
@@ -62,8 +63,8 @@ export class MessageController {
 
   @Get('/')
   async listMessage(
-    @Query('receiverKeyId') receiverKeyId: string,
-    @Query('senderKeyId') senderKeyId: string,
+    @Query('receiverKeyId') receiverKeyId: IDidDetails['uri'],
+    @Query('senderKeyId') senderKeyId: IDidDetails['uri'],
     @Query('start_id') startId: number,
     @Query('size') size: number
   ) {

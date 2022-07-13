@@ -62,3 +62,7 @@ ALTER TABLE claim_queue MODIFY COLUMN update_time datetime NOT NULL DEFAULT CURR
 -- 2022-06-15 adapt message
 ALTER TABLE claim MODIFY COLUMN root_hash varchar(255) NULL COMMENT "credential's rootHash"
 ALTER TABLE claim MODIFY COLUMN attested_status tinyint unsigned NULL COMMENT "attested status"
+
+-- 2022-07-12 adapt message
+ALTER TABLE claim ADD COLUMN receiver_address varchar(255) NULL COMMENT "receiver address";
+ALTER TABLE claim ADD COLUMN sender_address varchar(255) NULL COMMENT "sender address";
