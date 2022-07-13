@@ -9,12 +9,12 @@ import {
 } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
 import { Context } from '@midwayjs/socketio';
-import { MessageConstant } from '../constant/MessageConstant';
+import { WebSocketConstant } from '../constant/WebSocketConstant';
 import { MessagePushService } from '../service/MessagePushService';
 
 @Provide()
-@WSController('/')
-export class MessageSocketController {
+@WSController(WebSocketConstant.DEFAULT_NAMESPACE)
+export class CredentialSocketController {
   @Inject()
   ctx: Context;
 
@@ -36,7 +36,7 @@ export class MessageSocketController {
    * @param address
    * @param start_id
    */
-  @OnWSMessage(MessageConstant.MESSAGE_SUBSCRIBE)
+  @OnWSMessage(WebSocketConstant.MESSAGE_SUBSCRIBE)
   async messageSubscribe({ address, start_id }) {
     const socketId = this.ctx.id;
     await this.messagePushService.subscribeMessage(socketId, address, start_id);

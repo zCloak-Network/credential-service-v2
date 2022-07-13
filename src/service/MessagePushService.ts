@@ -10,7 +10,7 @@ import { ILogger } from '@midwayjs/logger';
 import { InjectEntityModel } from '@midwayjs/orm';
 import { Application as SocketApplication } from '@midwayjs/socketio/dist/interface';
 import { MoreThan, Repository } from 'typeorm';
-import { MessageConstant } from '../constant/MessageConstant';
+import { WebSocketConstant } from '../constant/WebSocketConstant';
 import { Claim } from '../entity/mysql/Claim';
 
 @Provide()
@@ -72,7 +72,10 @@ export class MessagePushService {
 
       try {
         // notify receiver
-        this.socketApp.to(socketId).emit(MessageConstant.MESSAGE_LIST, m);
+        this.socketApp
+          .of(WebSocketConstant.DEFAULT_NAMESPACE)
+          .to(socketId)
+          .emit(WebSocketConstant.MESSAGE_LIST, m);
       } catch (err) {
         this.logger.error(`message push error ${a}`);
       }
