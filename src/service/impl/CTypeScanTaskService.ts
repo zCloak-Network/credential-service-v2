@@ -117,7 +117,7 @@ export class CTypeScanTaskService implements ITaskService {
 
           cTypes.push(cType);
         } else {
-          this.logger.debug(`${i} ctypeHash already handle ${ctypeHash}, skip`);
+          // this.logger.debug(`${i} ctypeHash already handle ${ctypeHash}, skip`);
         }
 
         i++;

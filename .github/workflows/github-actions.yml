@@ -51,3 +51,28 @@ jobs:
             npm run build
             npm stop
             npm start
+  prod-spiritnet-deploy:
+    if: github.ref == 'refs/heads/spiritnet'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    environment: spiritnet
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
+          port: 22
+          script: |
+            source ~/.bashrc
+            source ~/.bash_aliases
+            cd /mnt/credential-service-v2
+            git checkout -- package.json
+            git pull
+            npm install
+            npm run build
+            npm stop
+            npm start
