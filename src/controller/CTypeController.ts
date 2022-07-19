@@ -31,13 +31,6 @@ export class CtypeController {
     return ResultVO.success(data);
   }
 
-  @Post('/on-chain')
-  async saveOnChainCType(@Body(ALL) cTypeReq: SaveCTypeRequest) {
-    const cType = cTypeReq as CType;
-    await this.cTypeService.saveOnChainCType(cType);
-    return ResultVO.success();
-  }
-
   @Post('/')
   async save(@Body(ALL) cTypeReq: SaveCTypeRequest) {
     const cType = cTypeReq as CType;

@@ -7,13 +7,14 @@ import {
   Scope,
   ScopeEnum,
 } from '@midwayjs/decorator';
-import Web3 from 'web3';
-import { Transfer } from '../entity/Transfer';
-import { TransferService } from './TransferService';
 import { ILogger } from '@midwayjs/logger';
+import Web3 from 'web3';
 import { transfering, transferSuccess } from '../constant/transferStatus';
+import { Transfer } from '../entity/Transfer';
 import { CommonUtils } from '../util/CommonUtils';
+import { JsonUtils } from '../util/JsonUtils';
 import { ObjUtils } from '../util/ObjUtils';
+import { TransferService } from './TransferService';
 
 @Provide()
 @Scope(ScopeEnum.Singleton)
@@ -93,7 +94,7 @@ export class UserService {
         await CommonUtils.sleep(1000);
       } catch (e) {
         this.nonce = undefined;
-        this.logger.warn(`transfer error: ${JSON.stringify(e)}`);
+        this.logger.warn(`transfer error: ${JsonUtils.stringify(e)}`);
 
         await CommonUtils.sleep(10000);
       }
@@ -133,7 +134,6 @@ export class UserService {
     transfer.addressTo = addressTo;
     transfer.value = this.tokenNumber;
     await this.transferService.save(transfer);
-
     // const transferModel =
     // const transferId = transferModel._id;
 

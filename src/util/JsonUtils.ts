@@ -1,6 +1,23 @@
 import { ObjUtils } from './ObjUtils';
 
 export class JsonUtils {
+  static isJsonString(str: any) {
+    try {
+      if (typeof str === 'string' && typeof JSON.parse(str) === 'object') {
+        return true;
+      }
+    } catch (err) {
+      return false;
+    }
+  }
+
+  static stringify(arg: any) {
+    if (arg) {
+      return JSON.stringify(arg, Object.getOwnPropertyNames(arg));
+    }
+    return null;
+  }
+
   static toUnicode(arg: any) {
     if (ObjUtils.isNotNull(arg)) {
       let result = '';

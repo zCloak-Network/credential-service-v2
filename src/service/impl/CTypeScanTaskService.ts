@@ -2,12 +2,13 @@ import * as Kilt from '@kiltprotocol/sdk-js';
 import { Config, Init, Inject, Logger, Provide } from '@midwayjs/decorator';
 import { ILogger } from '@midwayjs/logger';
 import { CTypeScanConstant } from '../../constant/CTypeScanConstant';
-import { SubScanRequestApi } from '../../util/SubScanRequestApi';
-import { ITaskService } from '../ITaskService';
 import { ArrUtils } from '../../util/ArrUtils';
 import { CommonUtils } from '../../util/CommonUtils';
+import { JsonUtils } from '../../util/JsonUtils';
 import { RequestApi } from '../../util/RequestApi';
+import { SubScanRequestApi } from '../../util/SubScanRequestApi';
 import { CTypeService } from '../CTypeService';
+import { ITaskService } from '../ITaskService';
 
 @Provide()
 export class CTypeScanTaskService implements ITaskService {
@@ -68,7 +69,7 @@ export class CTypeScanTaskService implements ITaskService {
         lastCount = currentCount;
       } catch (err) {
         this.logger.error(
-          `start error lastCount ${lastCount}\n${JSON.stringify(err)}`
+          `start error lastCount ${lastCount}\n${JsonUtils.stringify(err)}`
         );
         await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
       }
@@ -107,22 +108,31 @@ export class CTypeScanTaskService implements ITaskService {
             extrinsicHash
           );
           const metadata = await this.getMetadata(extrinsic, ctypeHash);
-          const owner = extrinsic?.id;
 
-          const cType: CType = {
-            metadata,
-            owner,
-            ctypeHash,
-          };
+          if (metadata) {
+            const owner = extrinsic.account_id;
 
-          cTypes.push(cType);
+            const cType: CType = {
+              metadata,
+              owner,
+              ctypeHash,
+            };
+
+            cTypes.push(cType);
+          } else {
+            this.logger.warn(
+              `${i} metadata is null ctypeHash ${ctypeHash}, skip`
+            );
+          }
         } else {
           this.logger.debug(`${i} ctypeHash already handle ${ctypeHash}, skip`);
         }
 
         i++;
       } catch (err) {
-        this.logger.error(`build ${i} ctype error\n${JSON.stringify(err)}`);
+        this.logger.error(
+          `build ${i} ctype error\n${err.message ?? err.stack}`
+        );
         await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
       }
     }
@@ -131,10 +141,13 @@ export class CTypeScanTaskService implements ITaskService {
 
   private async getMetadata(extrinsic: any, ctypeHash: string) {
     if (extrinsic) {
-      const paramObj = extrinsic.params[0].value.call.params[0].value;
-      if (typeof paramObj === 'string') {
+      const call = extrinsic.params[0].value.call;
+      const paramObj = call.params[0].value;
+
+      if (JsonUtils.isJsonString(paramObj)) {
         return JSON.parse(paramObj);
       }
+
       if (paramObj instanceof Array) {
         this.logger.debug(
           `ctype metadata is Array. Next compare the ctype hash value ${ctypeHash}`
@@ -239,13 +252,15 @@ export class CTypeScanTaskService implements ITaskService {
             );
           } else {
             // save
-            this.logger.debug(`save ${i} ctype\n${JSON.stringify(cType)}`);
+            this.logger.debug(`save ${i} ctype\n${JsonUtils.stringify(cType)}`);
             await this.saveCType(cType);
           }
 
           i++;
         } catch (err) {
-          this.logger.error(`handle ${i} ctype error\n${JSON.stringify(err)}`);
+          this.logger.error(
+            `handle ${i} ctype error\n${err.message ?? err.stack}`
+          );
           await CommonUtils.sleep(CTypeScanConstant.DEFAULT_ERROR_WAIT_TIME);
         }
       }

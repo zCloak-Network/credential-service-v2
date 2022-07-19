@@ -58,7 +58,11 @@ export class MessageController {
 
   @Post('/')
   async saveMessage(@Body(ALL) claimReq: SaveClaimRequest) {
-    return await this.messageService.saveAndVerify(claimReq);
+    const result = await this.messageService.saveAndVerify(claimReq);
+    if (result === -1) {
+      return ResultVO.error('verify failed.');
+    }
+    return ResultVO.success();
   }
 
   @Get('/')
