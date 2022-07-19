@@ -19,8 +19,14 @@ export class ContainerLifeCycle implements ILifeCycle {
   @App()
   app: Application;
 
-  // @Config('zCloak.moonbase.url')
-  // chainUrl: string;
+  @Config('zCloak.moonbase.enable')
+  enableFaucet: boolean;
+
+  @Config('zCloak.scan.enable')
+  enableScanCType: boolean;
+
+  @Config('adminAttester.enable')
+  enableAttester: boolean;
 
   @Config('logger')
   loggerConfig: any;
@@ -68,17 +74,27 @@ export class ContainerLifeCycle implements ILifeCycle {
     // container.registerObject('web3', web3);
 
     // await AppInitializerHelper.init(this.app);
-    new SubmitAttestationTaskInitializer().doInit(this.app);
+    console.log(`enableAttester: ${this.enableAttester}`);
+    console.log(`this.enableFaucet: ${this.enableFaucet}`);
+    console.log(`this.enableScanCType: ${this.enableScanCType}`);
 
-    const cTypeScanTaskService = await this.app
-      .getApplicationContext()
-      .getAsync<CTypeScanTaskService>(CTypeScanTaskService);
-    cTypeScanTaskService.doTask();
+    if (this.enableAttester) {
+      new SubmitAttestationTaskInitializer().doInit(this.app);
+    }
 
-    const userService = await this.app
-      .getApplicationContext()
-      .getAsync<UserService>(UserService);
-    userService.polling();
+    if (this.enableScanCType) {
+      const cTypeScanTaskService = await this.app
+        .getApplicationContext()
+        .getAsync<CTypeScanTaskService>(CTypeScanTaskService);
+      cTypeScanTaskService.doTask();
+    }
+
+    if (this.enableFaucet) {
+      const userService = await this.app
+        .getApplicationContext()
+        .getAsync<UserService>(UserService);
+      userService.polling();
+    }
 
     // const faucetQueueService = await this.app
     //   .getApplicationContext()
