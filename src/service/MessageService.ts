@@ -5,18 +5,17 @@ import { InjectEntityModel } from '@midwayjs/orm';
 import { Context } from '@midwayjs/web';
 import { MoreThan, Repository } from 'typeorm';
 
-import { Claim } from '../entity/mysql/Claim';
+import { ClaimEntity } from '../entity/mysql/ClaimEntity';
 import { SaveClaimRequest } from '../request/SaveClaimRequest';
 import { ArrUtils } from '../util/ArrUtils';
 import { KiltUtils } from '../util/KiltUtils';
-import { ResultVO } from '../vo/ResultVO';
 import { MessagePushService } from './MessagePushService';
 import { ReCaptchaService } from './ReCaptchaService';
 
 @Provide()
 export class MessageService {
-  @InjectEntityModel(Claim)
-  claimRepository: Repository<Claim>;
+  @InjectEntityModel(ClaimEntity)
+  claimRepository: Repository<ClaimEntity>;
 
   @Inject()
   ctx: Context;
@@ -39,10 +38,10 @@ export class MessageService {
     // verify
     if (!(await this.reCaptchaService.verify(reCaptchaToken))) {
       this.logger.warn(`verify failed, ip:${ip}`);
-      return ResultVO.error('verify failed.');
+      return -1;
     }
 
-    const claim = new Claim();
+    const claim = new ClaimEntity();
     claim.ciphertext = ciphertext;
     claim.senderKeyId = senderKeyId;
     claim.receiverKeyId = receiverKeyId;
@@ -53,10 +52,10 @@ export class MessageService {
     await this.claimRepository.save(claim);
     await this.messagePushService.sendMessage(claim);
 
-    return ResultVO.success(claim);
+    return 0;
   }
 
-  async save(claim: Claim) {
+  async save(claim: ClaimEntity) {
     await this.claimRepository.save(claim);
   }
 

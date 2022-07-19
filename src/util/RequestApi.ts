@@ -48,7 +48,6 @@ export class RequestApi {
         })
         .then(resolve)
         .catch(err => {
-          console.log(JSON.stringify(err));
           reject(err);
         });
     });

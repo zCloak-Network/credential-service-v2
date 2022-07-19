@@ -1,14 +1,20 @@
+import { Repository } from 'typeorm';
 import { Claim } from '../entity/Claim';
 import { InjectEntityModel } from '@midwayjs/typegoose';
+import { InjectEntityModel as InjectEntityModel2 } from '@midwayjs/orm';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { Logger, Provide } from '@midwayjs/decorator';
 import { AttestationStatus } from '../constant/attestationStatus';
 import { ILogger } from '@midwayjs/logger';
+import { ClaimEntity } from '../entity/mysql/ClaimEntity';
 
 @Provide()
 export class ClaimService {
   @InjectEntityModel(Claim)
   claimModel: ReturnModelType<typeof Claim>;
+
+  @InjectEntityModel2(ClaimEntity)
+  claimRepository: Repository<ClaimEntity>;
 
   @Logger()
   logger: ILogger;

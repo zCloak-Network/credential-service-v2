@@ -11,7 +11,7 @@ import { InjectEntityModel } from '@midwayjs/orm';
 import { Application as SocketApplication } from '@midwayjs/socketio/dist/interface';
 import { MoreThan, Repository } from 'typeorm';
 import { WebSocketConstant } from '../constant/WebSocketConstant';
-import { Claim } from '../entity/mysql/Claim';
+import { ClaimEntity } from '../entity/mysql/ClaimEntity';
 
 @Provide()
 @Scope(ScopeEnum.Singleton)
@@ -27,8 +27,8 @@ export class MessagePushService {
   @App(MidwayFrameworkType.WS_IO)
   socketApp: SocketApplication;
 
-  @InjectEntityModel(Claim)
-  claimRepository: Repository<Claim>;
+  @InjectEntityModel(ClaimEntity)
+  claimRepository: Repository<ClaimEntity>;
 
   async subscribeMessage(socketId: string, address: string, startId: number) {
     this.logger.info(
@@ -60,7 +60,7 @@ export class MessagePushService {
     this.addressToSocketIdMap.delete(address);
   }
 
-  async sendMessage(args: Claim | Claim[]) {
+  async sendMessage(args: ClaimEntity | ClaimEntity[]) {
     const addressMessageMap = this.getAddressMapForSend(args);
 
     addressMessageMap.forEach((m, a) => {
@@ -86,15 +86,15 @@ export class MessagePushService {
    * return address -> [message1, message2, message3]
    * @param obj
    */
-  getAddressMapForSend(obj: Claim | Claim[]) {
-    const addressMessageMap = new Map<string, Claim[]>();
-    const messages: Claim[] = [];
+  getAddressMapForSend(obj: ClaimEntity | ClaimEntity[]) {
+    const addressMessageMap = new Map<string, ClaimEntity[]>();
+    const messages: ClaimEntity[] = [];
     if (obj instanceof Array) {
       for (const o of obj) {
         messages.push(o);
       }
     }
-    if (obj instanceof Claim) {
+    if (obj instanceof ClaimEntity) {
       messages.push(obj);
     }
 

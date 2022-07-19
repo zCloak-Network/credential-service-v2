@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { AppConstant } from '../constant/AppConstant';
 import { notSubmit } from '../constant/attestationStatus';
 import { Attestation } from '../entity/Attestation';
-import { Claim as ClaimEntity } from '../entity/mysql/Claim';
+import { ClaimEntity } from '../entity/mysql/ClaimEntity';
 import { ClaimQueue } from '../queue/impl/ClaimQueue';
 import { IQueueClient } from '../queue/IQueueClient';
 import { SubmitClaimRequest } from '../request/SubmitClaimRequest';
@@ -112,10 +112,10 @@ export class AdminAttesterService {
 
   //   // step 1: save claim
   //   this.logger.debug(`${logPrefix} save claim to db`);
-  //   // const claim = submitClaimRequest as Claim;
-  //   // const claim = convertInstance(submitClaimRequest, Claim);
+  //   // const claim = submitClaimRequest as ClaimEntity;
+  //   // const claim = convertInstance(submitClaimRequest, ClaimEntity);
 
-  //   const claim = new Claim();
+  //   const claim = new ClaimEntity();
   //   claim.receivedAt = submitClaimRequest.receivedAt;
   //   claim.ciphertext = submitClaimRequest.ciphertext;
   //   claim.nonce = submitClaimRequest.nonce;
