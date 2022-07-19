@@ -1,9 +1,13 @@
 import { EntityModel } from '@midwayjs/orm';
-import { Column } from 'typeorm';
-import { BaseEntity } from './BaseEntity';
+import {
+  Column,
+  CreateDateColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @EntityModel({ name: 'ctype' })
-export class CTypeEntity extends BaseEntity {
+export class CTypeEntity {
   @Column({
     name: 'metadata',
     type: 'json',
@@ -27,6 +31,17 @@ export class CTypeEntity extends BaseEntity {
     comment: 'owner address',
   })
   owner: string;
+
+  // adapt zkID-service==
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @CreateDateColumn()
+  createTime: Date;
+
+  @UpdateDateColumn()
+  updateTime: Date;
+  // adapt zkID-service==
 }
 
 interface IMetadata {
