@@ -32,6 +32,14 @@ export class CTypeEntity {
   })
   owner: string;
 
+  @Column({
+    name: 'description',
+    type: 'varchar',
+    nullable: true,
+    comment: 'owner address',
+  })
+  description: string;
+
   // adapt zkID-service==
   @PrimaryGeneratedColumn()
   id: number;

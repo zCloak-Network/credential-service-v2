@@ -15,6 +15,8 @@ export class CType {
   ctypeHash: string;
   @prop()
   owner: string;
+  @prop()
+  description: string;
 }
 
 interface IMetadata {

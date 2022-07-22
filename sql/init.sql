@@ -102,3 +102,6 @@ CREATE TABLE `ctype` (
   `owner` varchar(255) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2022-07-12 adapt message
+ALTER TABLE ctype ADD COLUMN description varchar(255) NULL COMMENT "ctype description";

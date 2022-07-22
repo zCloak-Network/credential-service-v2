@@ -1,5 +1,5 @@
-import { Rule } from '@midwayjs/decorator'
-import { RuleType } from '@midwayjs/decorator/dist/annotation/rule'
+import { Rule } from '@midwayjs/decorator';
+import { RuleType } from '@midwayjs/decorator/dist/annotation/rule';
 
 class IMetadataProperties {
   [key: string]: IMultilangLabel;
@@ -7,6 +7,7 @@ class IMetadataProperties {
 
 class IMultilangLabel {
   default: string;
+
   [key: string]: string;
 }
 
@@ -28,6 +29,6 @@ export class SaveCTypeRequest {
   metadata: IMetadata;
   @Rule(RuleType.string())
   owner: string;
+  @Rule(RuleType.string())
+  description: string;
 }
-
-

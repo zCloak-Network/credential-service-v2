@@ -116,6 +116,7 @@ export class CTypeScanTaskService implements ITaskService {
               metadata,
               owner,
               ctypeHash,
+              description: null,
             };
 
             cTypes.push(cType);
@@ -286,4 +287,5 @@ interface CType {
   metadata: any;
   owner: string;
   ctypeHash: string;
+  description: string;
 }

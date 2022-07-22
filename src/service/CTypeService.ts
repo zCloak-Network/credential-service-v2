@@ -7,6 +7,7 @@ import { CType } from '../entity/CType';
 import { CTypeEntity } from '../entity/mysql/CTypeEntity';
 import { RowScanCTypeEntity } from '../entity/mysql/RowScanCTypeEntity';
 import { RowScanCType } from '../entity/RowScanCType';
+import { SaveCTypeRequest } from '../request/SaveCTypeRequest';
 
 @Provide()
 export class CTypeService {
@@ -22,12 +23,15 @@ export class CTypeService {
   @InjectEntityModel2(RowScanCTypeEntity)
   rowScanCTypeRepository: Repository<RowScanCTypeEntity>;
 
-  async getByCTypeHash(cTypeHash: string) {
-    return await this.cTypeModel.findOne({ ctypeHash: cTypeHash }).exec();
+  async getByCTypeHash(ctypeHash: string) {
+    const ctype = await this.cTypeModel.findOne({ ctypeHash }).exec();
+    const rowCtype = await this.getByCTypeHashFromChain(ctypeHash);
+
+    return ctype ?? rowCtype;
   }
 
-  async save(cType: CType) {
-    const { ctypeHash, owner, metadata } = cType;
+  async save(cTypeReq: SaveCTypeRequest) {
+    const { ctypeHash, owner, metadata, description } = cTypeReq;
     const count = await this.cTypeModel
       .count({
         ctypeHash,
@@ -35,22 +39,45 @@ export class CTypeService {
       })
       .exec();
     if (count < 1) {
-      await this.cTypeModel.create(cType);
+      // create
+      const ctype = new CType();
+      ctype.ctypeHash = ctypeHash;
+      ctype.owner = owner;
+      ctype.metadata = metadata;
+      ctype.description = description;
+      await this.cTypeModel.create(ctype);
+    } else {
+      // update
+      await this.cTypeModel.updateOne(
+        {
+          ctypeHash,
+          owner,
+        },
+        { description }
+      );
     }
 
     // TODO double write to mysql ==start
-    const count2 = await this.cTypeRepository.countBy({
+    const c2 = await this.cTypeRepository.findOneBy({
       ctypeHash,
       owner,
     });
-    if (count2 < 1) {
-      const c = new CTypeEntity();
-      c.owner = owner;
-      c.metadata = metadata;
-      c.ctypeHash = ctypeHash;
-      await this.cTypeRepository.save(c);
+    if (c2) {
+      // update
+      const { id } = c2;
+      await this.cTypeRepository.update({ id }, { description });
+    } else {
+      // create
+      const entity = new CTypeEntity();
+      entity.owner = owner;
+      entity.metadata = metadata;
+      entity.ctypeHash = ctypeHash;
+      entity.description = description;
+      await this.cTypeRepository.save(entity);
     }
     // TODO double write to mysql ==end
+
+    return cTypeReq;
   }
 
   async listCType() {

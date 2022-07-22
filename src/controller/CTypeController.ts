@@ -8,7 +8,6 @@ import {
   Post,
   Provide,
 } from '@midwayjs/decorator';
-import { CType } from '../entity/CType';
 import { SaveCTypeRequest } from '../request/SaveCTypeRequest';
 import { CTypeService } from '../service/CTypeService';
 import { ResultVO } from '../vo/ResultVO';
@@ -25,17 +24,10 @@ export class CtypeController {
     return ResultVO.success(data);
   }
 
-  @Get('/on-chain/:cTypeHash')
-  async getByCTypeHashFromChain(@Param() cTypeHash: string) {
-    const data = await this.cTypeService.getByCTypeHashFromChain(cTypeHash);
-    return ResultVO.success(data);
-  }
-
   @Post('/')
   async save(@Body(ALL) cTypeReq: SaveCTypeRequest) {
-    const cType = cTypeReq as CType;
-    await this.cTypeService.save(cType);
-    return ResultVO.success();
+    const data = await this.cTypeService.save(cTypeReq);
+    return ResultVO.success(data);
   }
 
   @Get('/')
